@@ -5,14 +5,17 @@
 #include <time.h>
 
 #define MAX_DIM 3
-struct kd_node_t{
-	double x[MAX_DIM];
-	struct kd_node_t *left, *right;
+
+typedef struct kd_node_t KD_NODE_T;
+typedef KD_NODE_T * node_ptr;
+
+struct kd_node_t {
+    double x[MAX_DIM];
+    node_ptr left;
+    node_ptr right;
 };
 
-inline double
-dist(struct kd_node_t *a, struct kd_node_t *b, int dim)
-{
+inline double dist(node_ptr a, node_ptr b, int dim) {
 	double t, d = 0;
 	while (dim--) {
 		t = a->x[dim] - b->x[dim];
@@ -21,23 +24,27 @@ dist(struct kd_node_t *a, struct kd_node_t *b, int dim)
 	return d;
 }
 
+inline void swap(node_ptr x, node_ptr y) {
+    double tmp[MAX_DIM];
+    memcpy(tmp,  x->x, sizeof(tmp));
+    memcpy(x->x, y->x, sizeof(tmp));
+    memcpy(y->x, tmp,  sizeof(tmp));
+}
+
 /* see quickselect method */
-struct kd_node_t*
-find_median(struct kd_node_t *start, struct kd_node_t *end, int idx)
-{
+node_ptr find_median(node_ptr start, node_ptr end, int idx) {
+    node_ptr p;
+    node_ptr store;
+    node_ptr md;
+
+	double pivot;
+
 	if (end <= start) return NULL;
 	if (end == start + 1)
 		return start;
 
-	inline void swap(struct kd_node_t *x, struct kd_node_t *y) {
-		double tmp[MAX_DIM];
-		memcpy(tmp,  x->x, sizeof(tmp));
-		memcpy(x->x, y->x, sizeof(tmp));
-		memcpy(y->x, tmp,  sizeof(tmp));
-	}
+    md = start + (end - start) /2;
 
-	struct kd_node_t *p, *store, *md = start + (end - start) / 2;
-	double pivot;
 	while (1) {
 		pivot = md->x[idx];
 
@@ -60,10 +67,8 @@ find_median(struct kd_node_t *start, struct kd_node_t *end, int idx)
 	}
 }
 
-struct kd_node_t*
-make_tree(struct kd_node_t *t, int len, int i, int dim)
-{
-	struct kd_node_t *n;
+node_ptr make_tree(struct kd_node_t *t, int len, int i, int dim) {
+	node_ptr n;
 
 	if (!len) return 0;
 
@@ -78,8 +83,8 @@ make_tree(struct kd_node_t *t, int len, int i, int dim)
 /* global variable, so sue me */
 int visited;
 
-void nearest(struct kd_node_t *root, struct kd_node_t *nd, int i, int dim,
-		struct kd_node_t **best, double *best_dist)
+void nearest(node_ptr root, node_ptr nd, int i, int dim,
+             KD_NODE_T **best, double *best_dist)
 {
 	double d, dx, dx2;
 
@@ -108,13 +113,13 @@ void nearest(struct kd_node_t *root, struct kd_node_t *nd, int i, int dim,
 #define N 1000000
 #define rand1()	(rand() / (double)RAND_MAX)
 #define rand_pt(v) { v.x[0] = rand1(); v.x[1] = rand1(); v.x[2] = rand1(); }
-int main(void)
-{
-	int i;
-	struct kd_node_t wp[] = {
-		{{2, 3}}, {{5, 4}}, {{9, 6}}, {{4, 7}}, {{8, 1}}, {{7, 2}}
-	};
-	struct kd_node_t this = {{9, 2}};
+int main(void) {
+    int i, sum, test_runs;
+    KD_NODE_T wp[] = {
+        {{2, 3}, NULL, NULL}, {{5, 4}, NULL, NULL}, {{9, 6}, NULL, NULL},
+        {{4, 7}, NULL, NULL}, {{8, 1}, NULL, NULL}, {{7, 2}, NULL, NULL}
+    };
+	KD_NODE_T this = {{9, 2}, NULL, NULL};
 	struct kd_node_t *root, *found, *million;
 	double best_dist;
 
@@ -129,7 +134,7 @@ int main(void)
 		this.x[0], this.x[1],
 		found->x[0], found->x[1], sqrt(best_dist), visited);
 
-	million = calloc(N, sizeof(struct kd_node_t));
+	million = calloc(N, sizeof(KD_NODE_T));
 	srand(time(0));
 	for (i = 0; i < N; i++) rand_pt(million[i]);
 
@@ -155,7 +160,9 @@ int main(void)
 		100000		~ 38.3
 		1000000		~ 42.6
 		10000000	~ 46.7				*/
-	int sum = 0, test_runs = 100000;
+
+	sum = 0;
+        test_runs = 100000;
 	for (i = 0; i < test_runs; i++) {
 		found = 0;
 		visited = 0;
@@ -167,7 +174,7 @@ int main(void)
 		"visited %d nodes for %d random findings (%f per lookup)\n",
 		sum, test_runs, sum/(double)test_runs);
 
-	// free(million);
+	free(million);
 
 	return 0;
 }
