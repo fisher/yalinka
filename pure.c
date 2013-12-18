@@ -67,6 +67,7 @@ node_ptr find_median(node_ptr start, node_ptr end, int idx) {
 	}
 }
 
+
 node_ptr make_tree(struct kd_node_t *t, int len, int i, int dim) {
 	node_ptr n;
 
@@ -80,15 +81,16 @@ node_ptr make_tree(struct kd_node_t *t, int len, int i, int dim) {
 	return n;
 }
 
-/* global variable, so sue me */
-int visited;
 
-void nearest(node_ptr root, node_ptr nd, int i, int dim,
-             KD_NODE_T **best, double *best_dist)
-{
+/* int visited; */
+
+int nearest( node_ptr root, node_ptr nd, int i, int dim,
+             KD_NODE_T **best, double *best_dist, int counter ) {
+
 	double d, dx, dx2;
+    int visited = counter;
 
-	if (!root) return;
+	if (!root) return visited;
 	d = dist(root, nd, dim);
 	dx = root->x[i] - nd->x[i];
 	dx2 = dx * dx;
@@ -101,20 +103,22 @@ void nearest(node_ptr root, node_ptr nd, int i, int dim,
 	}
 
 	/* if chance of exact match is high */
-	if (!*best_dist) return;
+	if (!*best_dist) return visited;
 
 	if (++i >= dim) i = 0;
 
-	nearest(dx > 0 ? root->left : root->right, nd, i, dim, best, best_dist);
-	if (dx2 >= *best_dist) return;
-	nearest(dx > 0 ? root->right : root->left, nd, i, dim, best, best_dist);
+	visited = nearest(dx > 0 ? root->left : root->right, nd, i, dim, best, best_dist, visited);
+	if (dx2 >= *best_dist) return visited;
+	visited = nearest(dx > 0 ? root->right : root->left, nd, i, dim, best, best_dist, visited);
+
+    return visited;
 }
 
 #define N 1000000
 #define rand1()	(rand() / (double)RAND_MAX)
 #define rand_pt(v) { v.x[0] = rand1(); v.x[1] = rand1(); v.x[2] = rand1(); }
 int main(void) {
-    int i, sum, test_runs;
+    int i, sum, test_runs, visited;
     KD_NODE_T wp[] = {
         {{2, 3}, NULL, NULL}, {{5, 4}, NULL, NULL}, {{9, 6}, NULL, NULL},
         {{4, 7}, NULL, NULL}, {{8, 1}, NULL, NULL}, {{7, 2}, NULL, NULL}
@@ -125,9 +129,9 @@ int main(void) {
 
 	root = make_tree(wp, sizeof(wp) / sizeof(wp[1]), 0, 2);
 
-	visited = 0;
+	/* visited = 0; */
 	found = 0;
-	nearest(root, &this, 0, 2, &found, &best_dist);
+	visited = nearest(root, &this, 0, 2, &found, &best_dist, 0);
 
 	printf(">> WP tree\nsearching for (%g, %g)\n"
 		"found (%g, %g) dist %g\nseen %d nodes\n\n",
@@ -141,9 +145,8 @@ int main(void) {
 	root = make_tree(million, N, 0, 3);
 	rand_pt(this);
 
-	visited = 0;
 	found = 0;
-	nearest(root, &this, 0, 3, &found, &best_dist);
+	visited = nearest(root, &this, 0, 3, &found, &best_dist, 0);
 
 	printf(">> Million tree\nsearching for (%g, %g, %g)\n"
 		"found (%g, %g, %g) dist %g\nseen %d nodes\n",
@@ -162,12 +165,12 @@ int main(void) {
 		10000000	~ 46.7				*/
 
 	sum = 0;
-        test_runs = 100000;
+    test_runs = 100000;
+
 	for (i = 0; i < test_runs; i++) {
 		found = 0;
-		visited = 0;
 		rand_pt(this);
-		nearest(root, &this, 0, 3, &found, &best_dist);
+		visited = nearest(root, &this, 0, 3, &found, &best_dist, 0);
 		sum += visited;
 	}
 	printf("\n>> Million tree\n"
