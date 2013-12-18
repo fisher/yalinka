@@ -8,5 +8,6 @@ TAGS
 opensuse.spec
 .dialyzer_plt
 *.app
+pure
 erl_crash.dump
 ekdarbo_nif.so
