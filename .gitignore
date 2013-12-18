@@ -1,0 +1,12 @@
+TAGS
+/bin
+/ebin
+/doc
+/obj
+.eunit
+.backups/
+opensuse.spec
+.dialyzer_plt
+*.app
+erl_crash.dump
+ekdarbo_nif.so
