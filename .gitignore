@@ -11,3 +11,4 @@ opensuse.spec
 pure
 erl_crash.dump
 ekdarbo_nif.so
+/tmp
