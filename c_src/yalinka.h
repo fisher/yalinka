@@ -1,0 +1,1 @@
+#define PAYLOAD_MAX_LEN 1023

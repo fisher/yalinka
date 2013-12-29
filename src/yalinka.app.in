@@ -1,0 +1,20 @@
+{application, adtruth,
+ [{description,"DeviceInsight AdTruth server-side library wrapper for erlang"},
+  {vsn, "{{VERSION}}" },
+  {registered,[]},
+  {applications,
+   [
+    %%inets, bishop
+   ]},
+  {mod,{adtruth_app,[]}},
+  {env,[]},
+  {modules,
+   [
+    adtruth
+   ]}]}.
+
+% Local Variables:
+% mode: erlang
+% indent-tabs-mode: nil
+% show-trailing-whitespace: t
+% End:

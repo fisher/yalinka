@@ -46,7 +46,10 @@ endif
 
 .PHONY: clean
 
-all: obj ebin privlib pure
+all: $(PACKAGE)
+
+
+$(PACKAGE): $(SONIF) ebin/$(PACKAGE).app $(BEAMS)
 
 
 #
@@ -69,13 +72,13 @@ doc-install: doc
 #
 # main shared object file with NIF
 #
-$(SONIF): $(COBJ)
+$(SONIF): privlib obj $(COBJ)
 	gcc -o $(SONIF) $(L_OPTS) $(COBJ)
 
 obj:
 	mkdir -p obj
 
-obj/%.o: %.c
+obj/%.o: c_src/%.c
 	gcc -o $@ $(C_OPTS) $<
 
 privlib:
@@ -90,7 +93,7 @@ ebin:
 ebin/%.beam: src/%.erl
 	erlc -o ebin -I include $(ERL_FLAGS) $<
 
-ebin/$(PACKAGE).app: src/$(PACKAGE).app.in
+ebin/$(PACKAGE).app: ebin src/$(PACKAGE).app.in
 	sed "s/{{VERSION}}/$(VERSION)/" \
 		src/$(PACKAGE).app.in >ebin/$(PACKAGE).app
 
