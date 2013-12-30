@@ -134,11 +134,11 @@ longtest: clean eunit oolong
 #
 # helpers, algo debug, auxiliary targets
 #
-pure: obj/pure.o
-	gcc -o pure $(L_OPTS) obj/pure.o
+obj/pure.o: tools/pure.c
+	gcc -o $@ $(C_OPTS) $<
 
-rosetta: obj/rosetta.o
-	gcc -o rosetta $(L_OPTS) obj/rosetta.o
+pure: obj obj/pure.o
+	gcc -o pure $(L_OPTS) obj/pure.o
 
 spec: opensuse.spec.in blob.spec.in
 	@echo "Creating rpm spec files..."
@@ -150,5 +150,5 @@ spec: opensuse.spec.in blob.spec.in
 # cleanup target
 #
 clean:
-	@rm -f rosetta pure *.o erl_crash.dump opensuse.spec $(SONIF)
+	@rm -f pure *.o erl_crash.dump opensuse.spec $(SONIF)
 	@rm -rf ebin doc .eunit priv/lib obj $(DESTDIR)
