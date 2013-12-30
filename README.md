@@ -1,13 +1,25 @@
-yalinka
-=======
+# yalinka - Erlang interface to k-dimensional trees
 
-Erlang interface to k-dimensional trees
+## Overview
 
-naming issues
-=============
+This is a library for Erlang language for operating on k-d trees.
 
-Since 'ekdtree' project already exists on a github I choose 'yalinka' as a name
-for this project. You can de-cypher it using 'yet another something' pattern,
-but 'yalinka' means christmas tree in ukrainian language. And now is X-mas here =)
+## Installation
 
+TBD
+
+## Deployment
+
+TBD
+
+## Configuration
+
+TBD
+
+## Naming issues
+
+Since 'ekdtree' project already exists here on a github I choose
+'yalinka' as a name for this project. Geel free to de-cypher it using
+'yet another something' pattern, but actually 'yalinka' is a ukrainian
+word meaning 'christmas tree'. And now is X-mas here =)
 
