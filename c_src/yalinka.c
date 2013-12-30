@@ -40,14 +40,10 @@
 #include <erl_nif.h>
 #include "yalinka.h"
 #include "ne_lib_funs.h"
-/*#include "nif_external.h"*/
+#include "kdtree.h"
 
 static int init_mod(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info);
 
-static ERL_NIF_TERM unixtime_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-static ERL_NIF_TERM tuple_return_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-static ERL_NIF_TERM list2_return_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-static ERL_NIF_TERM listn_return_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 static ERL_NIF_TERM list_return_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 static ERL_NIF_TERM revlist_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 static ERL_NIF_TERM test_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
@@ -56,10 +52,6 @@ static ERL_NIF_TERM normalize_to_bin_nif (ErlNifEnv*, int, const ERL_NIF_TERM []
 
 static ErlNifFunc nif_funcs[] = {
   /* fun, arity, c-fun */
-  {"unixtime", 0, unixtime_nif},
-  {"tuple_return", 0, tuple_return_nif},
-  {"list2_return", 0, list2_return_nif},
-  {"listn_return", 0, listn_return_nif},
   {"list_return", 1, list_return_nif},
   {"test", 1, test_nif},
   /*    {"test_external", 1, test_external_nif}, */
@@ -77,78 +69,6 @@ typedef struct state {
 } STATE;
 
 STATE *global_state;
-
-/* null-arity fun - returns an integer to erlang */
-static ERL_NIF_TERM unixtime_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM* )
-{
-  timeval tv;
-
-  memset(&tv, 0, sizeof(struct timeval));
-  if(gettimeofday( &tv, NULL )) return enif_make_badarg(env);
-
-  return enif_make_int64(env, tv.tv_sec);
-}
-
-/* key concept is how to return a tuple */
-static ERL_NIF_TERM tuple_return_nif(ErlNifEnv* env, int, const ERL_NIF_TERM*)
-{
-  timeval tv;
-  int error;
-
-  /* return proper error from errno if any errors in there */
-  if (gettimeofday( &tv, NULL )) {
-    error = errno;
-    return enif_make_tuple2( env,
-                             enif_make_atom(env, "error"),
-                             enif_make_atom(env, strerror(error)));
-  }
-
-  /* return tuple of size 2 with two integers in there */
-  return enif_make_tuple2( env,
-                           enif_make_int64(env, tv.tv_sec),
-                           enif_make_int64(env, tv.tv_usec) );
-}
-
-
-/* key concept is to return a simple list */
-static ERL_NIF_TERM list2_return_nif(ErlNifEnv* env, int, const ERL_NIF_TERM*)
-{
-  timeval tv;
-  int error;
-
-  /* return proper error if any */
-  if (gettimeofday( &tv, NULL )) {
-    error = errno;
-    return enif_make_tuple2( env,
-                             enif_make_atom(env, "error"),
-                             enif_make_atom(env, strerror(error)));
-  }
-
-  /*just like with tuple */
-  return enif_make_list2( env,
-                          enif_make_int64(env, tv.tv_sec),
-                          enif_make_int64(env, tv.tv_usec));
-}
-
-
-/* return list with variable length, from an array */
-static ERL_NIF_TERM listn_return_nif(ErlNifEnv* env, int, const ERL_NIF_TERM*)
-{
-
-#define ASIZE 3
-
-  ERL_NIF_TERM a[ASIZE];
-  int i;
-
-  for (i=0; i<ASIZE; i++) {
-    printf("%d\r\n", i);
-    a[i] = enif_make_int(env, i +1);
-  }
-
-  /* just like with tuple */
-  return enif_make_list_from_array( env, a, ASIZE);
-}
-
 
 /* return list with variable length, taken from an argument */
 static ERL_NIF_TERM list_return_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -226,13 +146,15 @@ static ERL_NIF_TERM revlist_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM arg
  * null-terminated char*, and then return back to erlang binary from
  * char*
  */
-static ERL_NIF_TERM test_nif(ErlNifEnv* env, int, const ERL_NIF_TERM argv[])
+static ERL_NIF_TERM test_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   int string_length;
   char buf[PAYLOAD_MAX_LEN];
   char *targetbuf;
   ERL_NIF_TERM retval;
   ErlNifBinary bindata;
+
+  if (argc != 1) return enif_make_badarg(env);
 
   /* check if arg1 is binary() */
   if (enif_is_binary(env, argv[0])) {
@@ -280,7 +202,8 @@ static ERL_NIF_TERM test_nif(ErlNifEnv* env, int, const ERL_NIF_TERM argv[])
 }
 
 /* getting proplist */
-static ERL_NIF_TERM getting_proplist_nif (ErlNifEnv* env, int, const ERL_NIF_TERM argv[])
+static ERL_NIF_TERM
+getting_proplist_nif (ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   /* list */
   unsigned int list_size;
@@ -317,6 +240,8 @@ static ERL_NIF_TERM getting_proplist_nif (ErlNifEnv* env, int, const ERL_NIF_TER
   /* temp buf */
   size_t len;
   char *targetbuf;
+
+  if (argc != 1) return enif_make_badarg(env);
 
   /* if it is not a list return an error immidiately */
   if (!enif_is_list(env, argv[0])) return enif_make_badarg(env);
@@ -435,7 +360,8 @@ static ERL_NIF_TERM getting_proplist_nif (ErlNifEnv* env, int, const ERL_NIF_TER
 }
 
 /* transform incoming list of atoms/strings to list of binaries */
-static ERL_NIF_TERM normalize_to_bin_nif (ErlNifEnv* env, int, const ERL_NIF_TERM argv[])
+static ERL_NIF_TERM
+normalize_to_bin_nif (ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
   /* list */
   unsigned int list_size;
@@ -455,6 +381,8 @@ static ERL_NIF_TERM normalize_to_bin_nif (ErlNifEnv* env, int, const ERL_NIF_TER
   char **container;
   size_t len;
   char *targetbuf;
+
+  if (argc != 1) return enif_make_badarg(env);
 
   /* if it is not a list return an error immidiately */
   if (!enif_is_list(env, argv[0])) return enif_make_badarg(env);
