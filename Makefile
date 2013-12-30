@@ -3,14 +3,14 @@
 #PACKAGE := etannenbaum
 PACKAGE := yalinka
 
-VERSION := `cat version`
-RELEASE := `cat release`
-REVISION := `git --no-pager log --max-count=1 --format=format:%H`
+VERSION := $(shell cat version)
+RELEASE := $(shell cat release)
+REVISION := $(shell git --no-pager log --max-count=1 --format=format:%H)
 
 DESTDIR ?= install-dir
 
-UID := `id -u`
-ARCH := `uname -m`
+UID := $(shell id -u)
+ARCH := $(shell uname -m)
 
 #DEBUG := true
 
@@ -33,9 +33,11 @@ ERL_FLAGS := +warn_unused_function \
 
 ERL_LIBS := ${ERL_LIBS}:~/lib/erl
 
-C_OPTS := -c -Wall -Wextra -pedantic
+C_OPTS := -c -Wall -Wextra -pedantic -fpic -std=c99
 
 L_OPTS := -lm
+
+GCC := $(shell which colorgcc ||echo gcc)
 
 ifdef DEBUG
 
@@ -73,13 +75,13 @@ doc-install: doc
 # main shared object file with NIF
 #
 $(SONIF): privlib obj $(COBJ)
-	gcc -o $(SONIF) $(L_OPTS) $(COBJ)
+	$(GCC) -o $(SONIF) -shared $(L_OPTS) $(COBJ)
 
 obj:
 	mkdir -p obj
 
 obj/%.o: c_src/%.c
-	gcc -o $@ $(C_OPTS) $<
+	$(GCC) -o $@ $(C_OPTS) $<
 
 privlib:
 	mkdir -p priv/lib
@@ -135,10 +137,10 @@ longtest: clean eunit oolong
 # helpers, algo debug, auxiliary targets
 #
 obj/pure.o: tools/pure.c
-	gcc -o $@ $(C_OPTS) $<
+	$(GCC) -o $@ $(C_OPTS) $<
 
 pure: obj obj/pure.o
-	gcc -o pure $(L_OPTS) obj/pure.o
+	$(GCC) -o pure $(L_OPTS) obj/pure.o
 
 spec: opensuse.spec.in blob.spec.in
 	@echo "Creating rpm spec files..."
@@ -146,9 +148,12 @@ spec: opensuse.spec.in blob.spec.in
 	     s,{{RELEASE}},$(RELEASE),g; \
 	     s,{{REVISION}},$(REVISION),g" opensuse.spec.in >opensuse.spec
 
+tags: c_src/*.c
+	ctags -e -f c_src/TAGS c_src/*
+
 #
 # cleanup target
 #
 clean:
-	@rm -f pure *.o erl_crash.dump opensuse.spec $(SONIF)
+	@rm -f pure *.o erl_crash.dump opensuse.spec c_src/TAGS $(SONIF)
 	@rm -rf ebin doc .eunit priv/lib obj $(DESTDIR)
