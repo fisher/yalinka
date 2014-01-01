@@ -38,3 +38,12 @@ extern char* gimme_string(ErlNifEnv *env, ERL_NIF_TERM *term, char *buff);
 extern ERL_NIF_TERM try_make_existing_atom(ErlNifEnv *env, const char *atom_name);
 
 #endif
+
+/*
+ * Local Variables:
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * mode: c
+ * End:
+ *
+ */
