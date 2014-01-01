@@ -1,21 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <math.h>
 #include <time.h>
 
-#define MAX_DIM 3
+#define KDTREE_C
+#include "kdtree.h"
 
-typedef struct kd_node_t KD_NODE_T;
-typedef KD_NODE_T * node_ptr;
-
-struct kd_node_t {
-    double x[MAX_DIM];
-    node_ptr left;
-    node_ptr right;
-};
-
-inline double dist(node_ptr a, node_ptr b, int dim) {
+inline static double dist(node_ptr a, node_ptr b, int dim) {
   double t, d = 0;
   while (dim--) {
     t = a->x[dim] - b->x[dim];
@@ -24,7 +17,7 @@ inline double dist(node_ptr a, node_ptr b, int dim) {
   return d;
 }
 
-inline void swap(node_ptr x, node_ptr y) {
+inline static void swap(node_ptr x, node_ptr y) {
   double tmp[MAX_DIM];
   memcpy(tmp,  x->x, sizeof(tmp));
   memcpy(x->x, y->x, sizeof(tmp));

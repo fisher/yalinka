@@ -57,6 +57,8 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     /* resource reference term */
     ERL_NIF_TERM term;
 
+    uint64_t asdf;
+
     /* just to make sure. and to satisfy compiler dilemma
        '(parameter name omitted' vs 'unused variable' */
     if (argc != 1) return enif_make_badarg(env);
@@ -68,7 +70,12 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     /* allocate memory here */
 
-    KD_NODE_T *node = enif_alloc_resource(kdtree_resource_t, sizeof(KD_NODE_T));
+    printf("got list on input of size %d\r\nallocating %lu x %d bytes\r\n",
+           list_size, sizeof(KD_NODE_T), list_size);
+
+    KD_TREE_T tree = enif_alloc_resource(kdtree_resource_t, sizeof(node_ptr) *list_size);
+
+    /* KD_TREE_T tree = (KD_TREE_T) malloc (sizeof(KD_NODE_T) *list_size); */
 
     i = 0;
     list = argv[0];
@@ -88,24 +95,43 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
             if (!enif_is_number(env, tuple[j])) return enif_make_badarg(env);
         } 
 
+        printf("trying to assign\r\n");
+
+        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &asdf)) return enif_make_badarg(env);
+
+        tree[i] = (node_ptr) enif_alloc (sizeof(KD_NODE_T));
+
+        printf("trying to assign [%d] to %" PRIu64 ".\r\n", i, asdf);
+
+        tree[i]->idx = asdf;
+
+        for (int j = 1; j<4; j++) {
+            double inp;
+            if (!enif_get_double(env, tuple[j], &inp)) return enif_make_badarg(env);
+
+            printf("trying to assign [%d][%d] to %g\r\n", i, j, inp);
+            tree[i]->x[j] = inp;
+
+        }
+
+        /* tree[i]->x[0] = 1.1; */
+        /* tree[i]->x[1] = 1.2; */
+        /* tree[i]->x[2] = 1.3; */
+
         printf("passed\r\n");
 
         list = tail;
         i++;
     }
 
-    node->x[0] = 1.2;
-    node->x[1] = 1.3;
-    node->x[2] = 1.4;
+    term = enif_make_resource(env, tree);
 
-    term = enif_make_resource(env, node);
-
-    if (keep_a_reference_of_our_own) {
-        /* store 'obj' in static variable, private data or other resource object */
-    }
-    else {
-        enif_release_resource(node);
-        /* resource now only owned by "Erlang" */
-    }
+    /* if (keep_a_reference_of_our_own) { */
+    /*     /\* store 'obj' in static variable, private data or other resource object *\/ */
+    /* } */
+    /* else { */
+        enif_release_resource(tree);
+    /*     /\* resource now only owned by "Erlang" *\/ */
+    /* } */
     return term;
 }

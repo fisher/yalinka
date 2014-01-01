@@ -70,6 +70,16 @@ typedef struct state {
 STATE *global_state;
 
 
+void kdtree_dtor(ErlNifEnv* env, void* arg)
+{
+  KD_TREE_T handler = (KD_TREE_T) arg;
+
+  printf("dtor entry\r\n");
+
+  enif_free(handler);
+}
+
+
 /*
  * this fun is called on module load. concept here is to store some
  * state between NIF fun calls, in special place, **priv_data
@@ -92,7 +102,7 @@ static int init_mod(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
         (ErlNifResourceFlags)(ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER);
 
     kdtree_resource_t = enif_open_resource_type
-        (env, "kdtree_rsrc_t", "kd3_t", NULL, flags, NULL);
+        (env, "kdtree_rsrc_t", "kd3_t", &kdtree_dtor, flags, NULL);
 
     global_state = (STATE*) enif_alloc (sizeof(STATE));
 

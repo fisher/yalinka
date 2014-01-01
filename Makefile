@@ -151,6 +151,9 @@ spec: opensuse.spec.in blob.spec.in
 tags: c_src/*.c
 	ctags -e -f c_src/TAGS c_src/*
 
+shell: priv/lib/yalinka.so ebin/yalinka.beam
+	erl -pa ebin -eval "code:load_file(yalinka)"
+
 #
 # cleanup target
 #
