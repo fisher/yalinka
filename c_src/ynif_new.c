@@ -73,7 +73,8 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     printf("got list on input of size %d\r\nallocating %lu x %d bytes\r\n",
            list_size, sizeof(KD_NODE_T), list_size);
 
-    KD_TREE_T tree = enif_alloc_resource(kdtree_resource_t, sizeof(node_ptr) *list_size);
+    KD_TREE_T tree =
+        enif_alloc_resource( kdtree_resource_t, sizeof(node_ptr) *list_size );
 
     /* KD_TREE_T tree = (KD_TREE_T) malloc (sizeof(KD_NODE_T) *list_size); */
 
@@ -93,11 +94,12 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
         for (int j = 0; j<4; j++) {
             if (!enif_is_number(env, tuple[j])) return enif_make_badarg(env);
-        } 
+        }
 
         printf("trying to assign\r\n");
 
-        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &asdf)) return enif_make_badarg(env);
+        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &asdf))
+            return enif_make_badarg(env);
 
         tree[i] = (node_ptr) enif_alloc (sizeof(KD_NODE_T));
 
@@ -107,7 +109,8 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
         for (int j = 1; j<4; j++) {
             double inp;
-            if (!enif_get_double(env, tuple[j], &inp)) return enif_make_badarg(env);
+            if (!enif_get_double(env, tuple[j], &inp))
+                return enif_make_badarg(env);
 
             printf("trying to assign [%d][%d] to %g\r\n", i, j, inp);
             tree[i]->x[j] = inp;
@@ -135,3 +138,13 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     /* } */
     return term;
 }
+
+
+/*
+ * Local Variables:
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * mode: c
+ * End:
+ *
+ */

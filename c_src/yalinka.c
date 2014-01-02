@@ -137,8 +137,12 @@ static void unload_mod(ErlNifEnv* env, void* priv_data)
     return;
 }
 
-/* Local Variables: */
-/* indent-tabs-mode: nil */
-/* show-trailing-whitespace: t */
-/* mode: c */
-/* End: */
+
+/*
+ * Local Variables:
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * mode: c
+ * End:
+ *
+ */

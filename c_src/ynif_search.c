@@ -44,3 +44,12 @@ ERL_NIF_TERM search_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     if (argc != 1) return enif_make_badarg(env);
 
 }
+
+/*
+ * Local Variables:
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * mode: c
+ * End:
+ *
+ */

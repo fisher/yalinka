@@ -1,7 +1,11 @@
 /*
  *     lib_funs.h
  *
- *     various auxiliary library funs
+ *     header file for common c functions library, erl_nif related
+ *
+ *     this file is part of 'yalinka' project, http://yalinka.heim.in.ua
+ *
+ *     Erlang NIF interface to K-dimensional trees
  *
  *     Copyright 2013 Serge A. Ribalchenko <fisher@heim.in.ua>
  *

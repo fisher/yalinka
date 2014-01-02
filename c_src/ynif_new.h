@@ -41,3 +41,12 @@ extern ERL_NIF_TERM new_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 
 
 #endif
+
+/*
+ * Local Variables:
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * mode: c
+ * End:
+ *
+ */

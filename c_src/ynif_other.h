@@ -43,3 +43,12 @@ extern ERL_NIF_TERM getting_proplist_nif (ErlNifEnv*, int, const ERL_NIF_TERM []
 extern ERL_NIF_TERM normalize_to_bin_nif (ErlNifEnv*, int, const ERL_NIF_TERM []);
 
 #endif
+
+/*
+ * Local Variables:
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * mode: c
+ * End:
+ *
+ */
