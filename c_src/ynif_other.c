@@ -431,3 +431,12 @@ normalize_to_bin_nif (ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
   return result;
 
 }
+
+/*
+ * Local Variables:
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * mode: c
+ * End:
+ *
+ */
