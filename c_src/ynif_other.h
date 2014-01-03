@@ -36,6 +36,9 @@
 #ifndef YNIF_OTHER_H
 #define YNIF_OTHER_H
 
+extern ERL_NIF_TERM size_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM clear_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+
 extern ERL_NIF_TERM list_return_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM revlist_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM test_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);

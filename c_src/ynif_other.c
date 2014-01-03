@@ -38,6 +38,41 @@
 #include <erl_nif.h>
 #include "yalinka.h"
 #include "lib_funs.h"
+#include "kdtree.h"
+
+ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+
+    ERL_NIF_TERM result;
+
+    KD_TREE_T *tree;
+
+    if (argc != 1) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **)&tree)) 
+       return enif_make_badarg(env);
+
+    result = enif_make_tuple2( env,
+                               try_make_existing_atom(env, "ok"),
+                               enif_make_int(env, tree->size));
+    return result;
+}
+
+ERL_NIF_TERM clear_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree;
+
+    if (argc != 1) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return enif_make_badarg(env);
+
+    printf("clear_nif, tree size: %" PRIu64 ".\r\n", tree->size);
+
+    enif_free(tree);
+
+    return try_make_existing_atom(env, "ok");
+}
 
 /* return list with variable length, taken from an argument */
 ERL_NIF_TERM list_return_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])

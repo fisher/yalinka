@@ -51,6 +51,8 @@ static void unload_mod(ErlNifEnv* env, void*  priv_data);
 static ErlNifFunc nif_funcs[] = {
     /* fun, arity, c-fun */
     {"new", 1, new_nif},
+    {"clear", 1, clear_nif},
+    {"size", 1, size_nif},
     {"list_return", 1, list_return_nif},
     {"test", 1, test_nif},
     /*    {"test_external", 1, test_external_nif}, */
@@ -68,6 +70,18 @@ typedef struct state {
 } STATE;
 
 STATE *global_state;
+
+
+void kdtree_dtor(ErlNifEnv* env, void* arg)
+{
+  KD_TREE_T *handler = (KD_TREE_T *) arg;
+
+  printf("dtor entry\r\n");
+
+  enif_free(handler->array);
+
+  enif_free(handler);
+}
 
 
 /*
@@ -91,8 +105,8 @@ static int init_mod(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
     ErlNifResourceFlags flags =
         (ErlNifResourceFlags)(ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER);
 
-    kdtree_resource_t = enif_open_resource_type
-        (env, "kdtree_rsrc_t", "kd3_t", NULL, flags, NULL);
+    KDTREE_RESOURCE = enif_open_resource_type
+        (env, "kdtree_rsrc_t", "kd3_t", &kdtree_dtor, flags, NULL);
 
     global_state = (STATE*) enif_alloc (sizeof(STATE));
 

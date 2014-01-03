@@ -68,7 +68,8 @@ node_ptr find_median(node_ptr start, node_ptr end, int idx) {
 }
 
 
-node_ptr make_tree(struct kd_node_t *t, int len, int i, int dim) {
+node_ptr make_tree( node_ptr t, int len, int i, int dim) {
+
 	node_ptr n;
 
 	if (!len) return 0;
@@ -81,8 +82,6 @@ node_ptr make_tree(struct kd_node_t *t, int len, int i, int dim) {
 	return n;
 }
 
-
-/* int visited; */
 
 int nearest( node_ptr root, node_ptr nd, int i, int dim,
              KD_NODE_T **best, double *best_dist, int counter ) {

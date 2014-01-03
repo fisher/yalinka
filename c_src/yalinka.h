@@ -5,6 +5,6 @@
 
 #define PAYLOAD_MAX_LEN 1023
 
-ErlNifResourceType *kdtree_resource_t;
+ErlNifResourceType *KDTREE_RESOURCE;
 
 #endif
