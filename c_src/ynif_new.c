@@ -106,7 +106,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
         for (int j = 0; j<4; j++) {
             if (!enif_is_number(env, tuple[j])) return enif_make_badarg(env);
-        } 
+        }
 
         printf("trying to assign\r\n");
 
@@ -136,7 +136,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     }
 
     term = enif_make_resource(env, tree);
-    
+
     /* if (keep_a_reference_of_our_own) { */
     /*     /\* store 'obj' in static variable, private data or other resource object *\/ */
     /* } */

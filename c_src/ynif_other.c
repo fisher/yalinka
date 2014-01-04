@@ -69,7 +69,7 @@ ERL_NIF_TERM clear_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     printf("clear_nif, tree size: %" PRIu64 ".\r\n", tree->size);
 
-    enif_free(tree);
+    enif_release_resource(tree);
 
     return try_make_existing_atom(env, "ok");
 }
