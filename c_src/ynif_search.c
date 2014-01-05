@@ -35,14 +35,48 @@
 
 #include <erl_nif.h>
 #include "yalinka.h"
+#include "kdtree.h"
+#include "lib_funs.h"
 
-/* create new kdtree from incoming list */
+/*
+ * spec search(reference(), {float(), float(), float()}, integer()) ->
+ *                     [{integer(), float()}].
+ */
 ERL_NIF_TERM search_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 {
-    int size;
 
-    if (argc != 1) return enif_make_badarg(env);
+    ERL_NIF_TERM result;
 
+    KD_TREE_T *tree;
+
+    uint64_t howmuch;
+
+    const ERL_NIF_TERM *tuple;
+    int tuple_arity;
+
+    if (argc != 3) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return enif_make_badarg(env);
+
+    if (!enif_is_tuple(env, argv[1])) return enif_make_badarg(env);
+
+    if (!enif_is_number(env, argv[2])) return enif_make_badarg(env);
+
+    if (!enif_get_tuple(env, argv[1], &tuple_arity, &tuple) ||
+        tuple_arity != 3) return enif_make_badarg(env);
+
+    if (!enif_get_uint64(env, argv[2], (ErlNifUInt64*) &howmuch))
+        return enif_make_badarg(env);
+
+    /* meat here */
+
+    result = enif_make_tuple3( env,
+                               try_make_existing_atom(env, "ok"),
+                               enif_make_int(env, howmuch),
+                               enif_make_int(env, tree->size));
+
+    return result;
 }
 
 /*

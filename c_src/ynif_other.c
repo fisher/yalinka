@@ -49,7 +49,7 @@ ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     if (argc != 1) return enif_make_badarg(env);
 
-    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **)&tree)) 
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **)&tree))
        return enif_make_badarg(env);
 
     result = enif_make_tuple2( env,
