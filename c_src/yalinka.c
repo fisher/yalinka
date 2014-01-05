@@ -43,6 +43,7 @@
 #include "lib_funs.h"
 #include "kdtree.h"
 #include "ynif_new.h"
+#include "ynif_search.h"
 #include "ynif_other.h"
 
 static int  init_mod  (ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info);
@@ -53,9 +54,9 @@ static ErlNifFunc nif_funcs[] = {
     {"new", 1, new_nif},
     {"clear", 1, clear_nif},
     {"size", 1, size_nif},
+    {"search", 3, search_nif},
     {"list_return", 1, list_return_nif},
     {"test", 1, test_nif},
-    /*    {"test_external", 1, test_external_nif}, */
     {"revlist", 1, revlist_nif},
     {"normalize_to_bin", 1, normalize_to_bin_nif},
     {"getting_proplist", 1, getting_proplist_nif}
