@@ -96,15 +96,23 @@ node_ptr find_median(node_ptr start, node_ptr end, int idx) {
 }
 
 
-node_ptr make_tree(struct kd_node_t *t, int len, int i, int dim) {
+/*
+ * tree : ptr to the array of nodes
+ * len  : the total size of an array
+ * i    : should be set to the size of a single node
+ * dim  : space dimension (arity of the point in space)
+ *
+ * returns pointer to the root of given tree
+ */
+node_ptr make_tree(node_ptr tree, int len, int i, int dim) {
   node_ptr n;
 
   if (!len) return 0;
 
-  if ((n = find_median(t, t + len, i))) {
+  if ((n = find_median(tree, tree + len, i))) {
     i = (i + 1) % dim;
-    n->left  = make_tree(t, n - t, i, dim);
-    n->right = make_tree(n + 1, t + len - (n + 1), i, dim);
+    n->left  = make_tree(tree, n - tree, i, dim);
+    n->right = make_tree(n + 1, tree + len - (n + 1), i, dim);
   }
   return n;
 }

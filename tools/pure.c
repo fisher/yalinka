@@ -15,7 +15,7 @@ struct kd_node_t {
     node_ptr right;
 };
 
-inline double dist(node_ptr a, node_ptr b, int dim) {
+static inline double dist(node_ptr a, node_ptr b, int dim) {
 	double t, d = 0;
 	while (dim--) {
 		t = a->x[dim] - b->x[dim];
@@ -24,7 +24,7 @@ inline double dist(node_ptr a, node_ptr b, int dim) {
 	return d;
 }
 
-inline void swap(node_ptr x, node_ptr y) {
+static inline void swap(node_ptr x, node_ptr y) {
     double tmp[MAX_DIM];
     memcpy(tmp,  x->x, sizeof(tmp));
     memcpy(x->x, y->x, sizeof(tmp));

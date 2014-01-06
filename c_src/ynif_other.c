@@ -67,11 +67,31 @@ ERL_NIF_TERM clear_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
         return enif_make_badarg(env);
 
+
+    /* for now our resource objects are GC'ed automatically */
+
     printf("clear_nif, tree size: %" PRIu64 ".\r\n", tree->size);
 
     enif_release_resource(tree);
 
     return try_make_existing_atom(env, "ok");
+}
+
+ERL_NIF_TERM dimension_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree;
+
+    ERL_NIF_TERM result;
+
+    if (argc != 1) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return enif_make_badarg(env);
+
+    result = enif_make_tuple2( env,
+                               try_make_existing_atom(env, "ok"),
+                               enif_make_int(env, tree->dimension));
+    return result;
 }
 
 /* return list with variable length, taken from an argument */

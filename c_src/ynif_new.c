@@ -135,6 +135,16 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
         i++;
     }
 
+    tree->dimension = 3;
+
+    printf("making index...\r\n");
+    tree->root = make_tree(
+        tree->array,
+        sizeof(tree->array),
+        sizeof(tree->array[0]),
+        tree->dimension);
+    printf("...done\r\n");
+
     term = enif_make_resource(env, tree);
 
     /* if (keep_a_reference_of_our_own) { */
