@@ -54,9 +54,13 @@ inline static double dist(node_ptr a, node_ptr b, int dim) {
 
 inline static void swap(node_ptr x, node_ptr y) {
   double tmp[MAX_DIM];
+  uint64_t idx;
   memcpy(tmp,  x->x, sizeof(tmp));
   memcpy(x->x, y->x, sizeof(tmp));
   memcpy(y->x, tmp,  sizeof(tmp));
+  idx = x->idx;
+  x->idx = y->idx;
+  y->idx = idx;
 }
 
 /* see quickselect method */
@@ -118,6 +122,17 @@ node_ptr make_tree(node_ptr tree, int len, int i, int dim) {
 }
 
 
+/*
+ * root : ptr to the root of the tree
+ * nd   : point to look for
+ * i    : index. on start should be set to 0
+ * dim  : dimension, arity of the points
+ * best : here we'll put down what we'll found
+ * best_dist : here we'll put down the best distance, squared
+ * counter   : just set it to 0 when call this
+ *
+ * returns the number of visited nodes
+ */
 int nearest( node_ptr root, node_ptr nd, int i, int dim,
              KD_NODE_T **best, double *best_dist, int counter ) {
 

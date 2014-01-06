@@ -95,13 +95,14 @@ ERL_NIF_TERM search_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     /* meat here */
 
-    printf("searching...\r\n");
+	printf("searching for (%g, %g, %g)\r\n",
+           point.x[0], point.x[1], point.x[2]);
 
     found = 0;
     int visited = nearest( tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
 
-	printf("searching for (%g, %g, %g)\r\n"
-		"found (%g, %g, %g) idx %lu dist %g\r\nseen %d nodes\r\n\n",
+	printf("search done.\r\nfor (%g, %g, %g) we've "
+           "found (%g, %g, %g)\r\nidx %lu dist %g\r\nseen %d nodes\r\n\n",
            point.x[0], point.x[1], point.x[2],
            found->x[0], found->x[1], found->x[2], found->idx,
            sqrt(best_dist), visited);

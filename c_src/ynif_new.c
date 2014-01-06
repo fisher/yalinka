@@ -40,6 +40,19 @@
 #include "lib_funs.h"
 #include "kdtree.h"
 
+void print_tree(KD_TREE_T *tree)
+{
+    printf("got tree of size %"PRIu64", dimension %"PRIu64"\r\n",
+           tree->size, tree->dimension);
+    for (unsigned int i = 0; i< tree->size; i++) {
+        printf(" \\ [%"PRIu64"] (%g", tree->array[i].idx, tree->array[i].x[0]);
+        for (unsigned int j = 1; j< tree->dimension; j++) {
+            printf(", %g", tree->array[i].x[j]);
+        }
+        printf(")\r\n");
+    }
+}
+
 /* create new kdtree from incoming list */
 ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 {
@@ -137,9 +150,14 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     tree->dimension = 3;
 
+    print_tree(tree);
+
     printf("making index for size %lu, dimension %lu)...\r\n", tree->size, tree->dimension);
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
+    /* tree->sorted = 1; */
     printf("...done\r\n");
+
+    print_tree(tree);
 
     term = enif_make_resource(env, tree);
 
