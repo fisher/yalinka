@@ -33,10 +33,13 @@
  *     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <math.h>
 #include <erl_nif.h>
 #include "yalinka.h"
 #include "kdtree.h"
 #include "lib_funs.h"
+
+#include <stdio.h>
 
 /*
  * spec search(reference(), {float(), float(), float()}, integer()) ->
@@ -44,16 +47,26 @@
  */
 ERL_NIF_TERM search_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 {
-
-    ERL_NIF_TERM result;
-
+    /* pointer to the tree */
     KD_TREE_T *tree;
 
+    /* point taken from the args */
+    KD_NODE_T point;
+
+    /* how much nearest points we should return */
     uint64_t howmuch;
 
+    /* temp placeholder for tuple and its arity */
     const ERL_NIF_TERM *tuple;
     int tuple_arity;
 
+    node_ptr found;
+    double best_dist;
+
+    /* placeholder for resulting term */
+    ERL_NIF_TERM result;
+
+    /* codeseg */
     if (argc != 3) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
@@ -69,12 +82,39 @@ ERL_NIF_TERM search_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     if (!enif_get_uint64(env, argv[2], (ErlNifUInt64*) &howmuch))
         return enif_make_badarg(env);
 
+    if (tree->size < 1)
+        return enif_make_tuple2(
+            env,
+            try_make_existing_atom(env, "error"),
+            try_make_existing_atom(env, "empty_tree"));
+
+    for (int i=0; i<tuple_arity; i++) {
+        if (!enif_get_double(env, tuple[i], &point.x[i]))
+            return enif_make_badarg(env);
+    }
+
     /* meat here */
 
-    result = enif_make_tuple3( env,
-                               try_make_existing_atom(env, "ok"),
-                               enif_make_int(env, howmuch),
-                               enif_make_int(env, tree->size));
+    printf("searching...\r\n");
+
+    found = 0;
+    int visited = nearest( tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
+
+	printf("searching for (%g, %g, %g)\r\n"
+		"found (%g, %g, %g) idx %lu dist %g\r\nseen %d nodes\r\n\n",
+           point.x[0], point.x[1], point.x[2],
+           found->x[0], found->x[1], found->x[2], found->idx,
+           sqrt(best_dist), visited);
+
+    printf("ok\r\n");
+
+    result = enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "ok"),
+        enif_make_tuple2 (
+            env,
+            enif_make_uint64(env, found->idx),
+            enif_make_double(env, sqrt(best_dist))));
 
     return result;
 }

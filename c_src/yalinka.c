@@ -56,6 +56,8 @@ static ErlNifFunc nif_funcs[] = {
     {"size", 1, size_nif},
     {"dimension", 1, dimension_nif},
     {"search", 3, search_nif},
+    {"root", 1, root_nif},
+    {"node", 2, node_nif},
     {"list_return", 1, list_return_nif},
     {"test", 1, test_nif},
     {"revlist", 1, revlist_nif},

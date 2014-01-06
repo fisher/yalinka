@@ -11,7 +11,7 @@
 -on_load(init/0).
 
 
--export([new/1, search/3, size/1, clear/1]).
+-export([new/1, search/3, size/1, dimension/1, root/1, node/2, clear/1]).
 
 -export([list_return/1, test/1, revlist/1, normalize_to_bin/1, getting_proplist/1]).
 
@@ -39,7 +39,7 @@ getting_proplist(_) ->
 
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc create new k-d tree object
 %% @end
 %%--------------------------------------------------------------------
 -spec new([point()]) -> {ok, reference()}.
@@ -56,11 +56,35 @@ search(_Ref, _Point, _K) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc return the quantity of a nodes in the tree
 %% @end
 %%--------------------------------------------------------------------
 -spec size(reference()) -> integer().
 size(_Ref) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @doc return space dimension (arity of the point in space)
+%% @end
+%%--------------------------------------------------------------------
+-spec dimension(reference()) -> integer().
+dimension(_Ref) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @doc return the root of the tree
+%% @end
+%%--------------------------------------------------------------------
+-spec root(reference()) -> point().
+root(_Ref) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @doc return the specified node of the unsorted tree
+%% @end
+%%--------------------------------------------------------------------
+-spec node(reference(), integer()) -> point().
+node(_Ref, _Idx) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
