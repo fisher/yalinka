@@ -84,7 +84,7 @@ void kdtree_dtor(ErlNifEnv* env, void* arg)
 
   enif_free(handler->array);
 
-  enif_free(handler);
+  /*enif_free(handler)*/;
 }
 
 

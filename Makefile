@@ -107,26 +107,22 @@ $(PACKAGE)_test: test/$(PACKAGE)_test.erl
 
 eunit:	$(PACKAGE) $(PACKAGE)_test
 	erl -noinput -pa ebin \
-		-eval 'ok = eunit:test('$(PACKAGE)'_test)' \
-		-s $(PACKAGE) unload \
+		-eval 'ok = eunit:test($(PACKAGE)_test)' \
 		-s erlang halt
 
 proper: $(PACKAGE) $(PACKAGE)_test
 	ERL_LIBS=$(ERL_LIBS):~/lib/erl erl -noinput -pa ebin \
 		-s $(PACKAGE)_test start \
-		-s $(PACKAGE) unload \
 		-s erlang halt
 
 oolong: $(PACKAGE) $(PACKAGE)_test
 	ERL_LIBS=$(ERL_LIBS):~/lib/erl erl -noinput -pa ebin \
 		-eval 'true = not is_tuple('$(PACKAGE)'_test:start([verbose, {numtests, 10000}]))' \
-		-s $(PACKAGE) unload \
 		-s erlang halt
 
 measure: $(PACKAGE) $(PACKAGE)_test
 	erl -noinput -pa ebin \
 		-s $(PACKAGE)_test measure \
-		-s $(PACKAGE) unload \
 		-s erlang halt
 
 test:	clean eunit proper

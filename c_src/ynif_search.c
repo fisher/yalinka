@@ -112,10 +112,12 @@ ERL_NIF_TERM search_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     result = enif_make_tuple2(
         env,
         try_make_existing_atom(env, "ok"),
-        enif_make_tuple2 (
+        enif_make_list1(
             env,
-            enif_make_uint64(env, found->idx),
-            enif_make_double(env, sqrt(best_dist))));
+            enif_make_tuple2 (
+                env,
+                enif_make_uint64(env, found->idx),
+                enif_make_double(env, sqrt(best_dist)))));
 
     return result;
 }
