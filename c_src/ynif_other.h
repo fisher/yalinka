@@ -42,12 +42,6 @@ extern ERL_NIF_TERM dimension_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM root_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM node_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 
-extern ERL_NIF_TERM list_return_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-extern ERL_NIF_TERM revlist_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-extern ERL_NIF_TERM test_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-extern ERL_NIF_TERM getting_proplist_nif (ErlNifEnv*, int, const ERL_NIF_TERM []);
-extern ERL_NIF_TERM normalize_to_bin_nif (ErlNifEnv*, int, const ERL_NIF_TERM []);
-
 #endif
 
 /*

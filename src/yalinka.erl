@@ -13,25 +13,12 @@
 
 -export([new/1, search/3, size/1, dimension/1, root/1, node/2, clear/1]).
 
--export([list_return/1, test/1, revlist/1, normalize_to_bin/1, getting_proplist/1]).
-
 
 -type point() :: {integer(), float(), float(), float()}.
 
 
 -define(not_loaded, erlang:nif_error(not_loaded)).
 
-
-list_return(_) ->
-    ?not_loaded.
-test(_) ->
-    ?not_loaded.
-revlist(_) ->
-    ?not_loaded.
-normalize_to_bin(_) ->
-    ?not_loaded.
-getting_proplist(_) ->
-    ?not_loaded.
 
 %%%===================================================================
 %%% API

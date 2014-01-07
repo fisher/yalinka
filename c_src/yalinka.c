@@ -57,12 +57,7 @@ static ErlNifFunc nif_funcs[] = {
     {"dimension", 1, dimension_nif},
     {"search", 3, search_nif},
     {"root", 1, root_nif},
-    {"node", 2, node_nif},
-    {"list_return", 1, list_return_nif},
-    {"test", 1, test_nif},
-    {"revlist", 1, revlist_nif},
-    {"normalize_to_bin", 1, normalize_to_bin_nif},
-    {"getting_proplist", 1, getting_proplist_nif}
+    {"node", 2, node_nif}
 };
 
 ERL_NIF_INIT(yalinka, nif_funcs, &init_mod, NULL, NULL, &unload_mod)
