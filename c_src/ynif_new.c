@@ -85,15 +85,23 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     if (!enif_is_list(env, argv[0])) return enif_make_badarg(env);
 
+    tree = enif_alloc_resource(KDTREE_RESOURCE, sizeof(KD_TREE_T));
+
+    /* found out the arity of the first tuple in the list */
+    if (!enif_get_list_cell(env, argv[0], &head, &tail))
+        return enif_make_badarg(env);
+
+    if (!enif_get_tuple(env, head, &arity, &tuple))
+        return enif_make_badarg(env);
+
+    tree->dimension = arity;
+
+    /* get the length of the list */
     if (!enif_get_list_length(env, argv[0], &list_size))
         return enif_make_badarg(env);
 
-    /* KD_TREE_T tree = enif_alloc_resource(kdtree_resource_t, sizeof(node_ptr) *list_size); */
-
     /* should be de-allocated in d-tor */
     array = enif_alloc(sizeof(KD_NODE_T) *list_size);
-
-    tree = enif_alloc_resource(KDTREE_RESOURCE, sizeof(KD_TREE_T));
 
     tree->array = array;
     tree->size = list_size;
@@ -106,7 +114,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
         if (!enif_is_tuple(env, head)) return enif_make_badarg(env);
 
         if (!enif_get_tuple(env, head, &arity, &tuple)
-            || arity != 4) {
+            || arity != (int) tree->dimension) {
             printf("error getting tuple\r\n");
             return enif_make_badarg(env);
         }
@@ -115,13 +123,15 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
             if (!enif_is_number(env, tuple[j])) return enif_make_badarg(env);
         }
 
-        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &asdf)) return enif_make_badarg(env);
+        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &asdf))
+            return enif_make_badarg(env);
 
         array[i].idx = asdf;
 
         for (int j = 1; j<4; j++) {
             double inp;
-            if (!enif_get_double(env, tuple[j], &inp)) return enif_make_badarg(env);
+            if (!enif_get_double(env, tuple[j], &inp))
+                return enif_make_badarg(env);
 
             array[i].x[j-1] = inp;
 
@@ -131,16 +141,20 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
         i++;
     }
 
-    tree->dimension = 3;
-
-    /* print_tree(tree); */
+#ifdef DEBUG
+    print_tree(tree);
 
     printf("indexing...");
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
     tree->sorted = 1;
     printf("done.\r\n");
 
-    /* print_tree(tree); */
+    print_tree(tree);
+#else
+    tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
+#endif
+
+    tree->sorted = 1;
 
     term = enif_make_resource(env, tree);
 

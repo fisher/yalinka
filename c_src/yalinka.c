@@ -32,12 +32,7 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <string.h>
-#include <sys/time.h>
-#include <errno.h>
-#include <inttypes.h>
 #include <erl_nif.h>
 #include "yalinka.h"
 #include "lib_funs.h"
