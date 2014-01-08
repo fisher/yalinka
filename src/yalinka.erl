@@ -11,7 +11,9 @@
 -on_load(init/0).
 
 
--export([new/1, search/3, size/1, dimension/1, root/1, node/2, clear/1]).
+-export([
+         new/1, search/2, search/3,
+         size/1, dimension/1, root/1, node/2, clear/1]).
 
 
 -type point() :: {integer(), float(), float(), float()}.
@@ -34,39 +36,52 @@ new(_Points) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc
+%% @doc search for nearest point in the Tree to the given Point
+%% @end
+%%--------------------------------------------------------------------
+-spec search(reference(), {float(), float(), float()}) ->
+                    {integer(), float()}.
+search(_Tree, _Point) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @doc find first N nearest points.
+%% @see search/2
 %% @end
 %%--------------------------------------------------------------------
 -spec search(reference(), {float(), float(), float()}, integer()) -> 
                     [{integer(), float()}].
-search(_Ref, _Point, _K) ->
+search(_Tree, _Point, _N) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc return the quantity of a nodes in the tree
+%% @doc return the quantity of a nodes in the Tree
 %% @end
 %%--------------------------------------------------------------------
 -spec size(reference()) -> integer().
-size(_Ref) ->
+size(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc return space dimension (arity of the point in space)
+%% @doc return space dimension (arity of the point in space) for the
+%%     given Tree
 %% @end
 %%--------------------------------------------------------------------
 -spec dimension(reference()) -> integer().
-dimension(_Ref) ->
+dimension(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc return the root of the tree
+%% @private
+%% @doc return the root of the Tree
 %% @end
 %%--------------------------------------------------------------------
 -spec root(reference()) -> point().
-root(_Ref) ->
+root(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
+%% @private
 %% @doc return the specified node of the unsorted tree
 %% @end
 %%--------------------------------------------------------------------

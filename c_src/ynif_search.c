@@ -41,20 +41,47 @@
 
 #include <stdio.h>
 
+
+ERL_NIF_TERM search_nearest(ErlNifEnv*, const ERL_NIF_TERM*, uint64_t);
+
+ERL_NIF_TERM search2_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
+{
+    if (argc !=2) return enif_make_badarg(env);
+
+    return search_nearest( env, argv, 1 );
+}
+
+ERL_NIF_TERM search3_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
+{
+    uint64_t howmuch;
+
+    if (argc !=3) return enif_make_badarg(env);
+
+    if (!enif_get_uint64(env, argv[2], (ErlNifUInt64*) &howmuch))
+        return enif_make_badarg(env);
+
+    if (howmuch != 1)
+        return enif_make_tuple2(
+            env,
+            try_make_existing_atom(env, "error"),
+            try_make_existing_atom(env, "multiple_search_not_implemented"));
+
+    return search_nearest( env, argv, howmuch );
+}
+
+/* ********************************************************************** */
+
 /*
  * spec search(reference(), {float(), float(), float()}, integer()) ->
  *                     [{integer(), float()}].
  */
-ERL_NIF_TERM search_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
+ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t howmuch)
 {
     /* pointer to the tree */
     KD_TREE_T *tree;
 
     /* point taken from the args */
     KD_NODE_T point;
-
-    /* how much nearest points we should return */
-    uint64_t howmuch;
 
     /* temp placeholder for tuple and its arity */
     const ERL_NIF_TERM *tuple;
@@ -65,9 +92,6 @@ ERL_NIF_TERM search_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     /* placeholder for resulting term */
     ERL_NIF_TERM result;
-
-    /* codeseg */
-    if (argc != 3) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
         return enif_make_badarg(env);

@@ -13,6 +13,10 @@
 
 -define(ROOT, [{11, 10.0,10.0,10.0}, {12, -10.0,-10.0,-10.0}, {13, 1.0,1.0,1.0}]).
 
+-define(WIKIPEDIA_TEST,
+        [ {1, 2.0, 3.0}, {2, 5.0, 4.0}, {3, 9.0, 6.0},
+          {4, 4.0, 7.0}, {5, 8.0, 1.0}, {6, 7.0, 2.0}]).
+
 size_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     Size = yalinka:size(Tree),
@@ -29,6 +33,16 @@ root_test_() ->
      ?_assertEqual( yalinka:root(Ref), {ok,13,{1.0,1.0,1.0}} )
     ].
 
+wikipedia_test_() ->
+    {ok, Ref} = yalinka:new(?WIKIPEDIA_TEST),
+    [
+     ?_assert(
+        begin
+            {ok, [{5, Dist}]} = yalinka:search(Ref, {9.0, 2.0}, 1),
+            Dist < 1.4143 andalso Dist > 1.4141
+        end)
+    ].
+
 search_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     [
@@ -39,6 +53,3 @@ search_test_() ->
      ?_assertEqual( {ok, [{0, 50.0}, {2, 250.0}, {4, 250.0}]},
                     yalinka:search(Tree, {5.0, 5.0, 10.0}, 3) )
     ].
-
-     
-     

@@ -94,7 +94,15 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     if (!enif_get_tuple(env, head, &arity, &tuple))
         return enif_make_badarg(env);
 
+    /* don't forget to decrement it after we check all the tuples in a
+     * cycle below. I did it cause it seems stupid to decrement
+     * dimension everytime there when we compare arity of the tuple to
+     * the dimension. */
     tree->dimension = arity;
+
+#ifdef DEBUG
+    printf("detected dimension is %d\r\n", tree->dimension -1);
+#endif
 
     /* get the length of the list */
     if (!enif_get_list_length(env, argv[0], &list_size))
@@ -114,12 +122,12 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
         if (!enif_is_tuple(env, head)) return enif_make_badarg(env);
 
         if (!enif_get_tuple(env, head, &arity, &tuple)
-            || arity != (int) tree->dimension) {
+            || tree->dimension != (uint64_t) arity) {
             printf("error getting tuple\r\n");
             return enif_make_badarg(env);
         }
 
-        for (int j = 0; j<4; j++) {
+        for (int j = 0; j<arity; j++) {
             if (!enif_is_number(env, tuple[j])) return enif_make_badarg(env);
         }
 
@@ -128,7 +136,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
         array[i].idx = asdf;
 
-        for (int j = 1; j<4; j++) {
+        for (int j = 1; j<arity; j++) {
             double inp;
             if (!enif_get_double(env, tuple[j], &inp))
                 return enif_make_badarg(env);
@@ -140,6 +148,8 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
         list = tail;
         i++;
     }
+
+    tree->dimension--;
 
 #ifdef DEBUG
     print_tree(tree);

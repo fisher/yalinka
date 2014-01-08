@@ -36,7 +36,8 @@
 #ifndef YNIF_SEARCH_H
 #define YNIF_SEARCH_H
 
-extern ERL_NIF_TERM search_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM search2_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM search3_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 
 
 #endif
