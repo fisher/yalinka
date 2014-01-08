@@ -40,6 +40,8 @@
 #include "lib_funs.h"
 #include "kdtree.h"
 
+
+
 void print_tree(KD_TREE_T *tree)
 {
     printf("got tree of size %"PRIu64", dimension %"PRIu64"\r\n",
@@ -53,16 +55,70 @@ void print_tree(KD_TREE_T *tree)
     }
 }
 
+ERL_NIF_TERM fill_tree_from_plain_tuple(ErlNifEnv *env, ERL_NIF_TERM list, KD_TREE_T *tree )
+{
+
+    ERL_NIF_TERM list_ptr, head, tail;
+    const ERL_NIF_TERM *tuple;
+
+    /* iterator */
+    unsigned int i;
+
+    int arity;
+    uint64_t idx;
+
+    node_ptr array;
+
+    /* should be de-allocated in d-tor */
+    array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
+
+    tree->array = array;
+
+    i = 0;
+    list_ptr = list;
+
+    while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
+
+        if (!enif_is_tuple(env, head)) return enif_make_badarg(env);
+
+        if (!enif_get_tuple(env, head, &arity, &tuple)
+            || tree->dimension != (uint64_t) arity) {
+            printf("error getting tuple\r\n");
+            return enif_make_badarg(env);
+        }
+
+        for (int j = 0; j<arity; j++) {
+            if (!enif_is_number(env, tuple[j])) return enif_make_badarg(env);
+        }
+
+        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &idx))
+            return enif_make_badarg(env);
+
+        array[i].idx = idx;
+
+        for (int j = 1; j<arity; j++) {
+            double inp;
+            if (!enif_get_double(env, tuple[j], &inp))
+                return enif_make_badarg(env);
+
+            array[i].x[j-1] = inp;
+
+        }
+
+        list_ptr = tail;
+        i++;
+    }
+
+    return 0;
+
+}
+
 /* create new kdtree from incoming list */
 ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 {
     /* list */
     unsigned int list_size;
-    ERL_NIF_TERM list;
     ERL_NIF_TERM head, tail;
-
-    /* iterator */
-    unsigned int i;
 
     /* tuple */
     int arity;
@@ -74,10 +130,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     /* placeholder for resulting term, like {ok, Reference} */
     ERL_NIF_TERM result;
 
-    uint64_t asdf;
-
     KD_TREE_T *tree;
-    node_ptr array;
 
     /* just to make sure. and to satisfy compiler dilemma
        '(parameter name omitted' vs 'unused variable' */
@@ -108,46 +161,10 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     if (!enif_get_list_length(env, argv[0], &list_size))
         return enif_make_badarg(env);
 
-    /* should be de-allocated in d-tor */
-    array = enif_alloc(sizeof(KD_NODE_T) *list_size);
-
-    tree->array = array;
     tree->size = list_size;
 
-    i = 0;
-    list = argv[0];
-
-    while (enif_get_list_cell(env, list, &head, &tail)) {
-
-        if (!enif_is_tuple(env, head)) return enif_make_badarg(env);
-
-        if (!enif_get_tuple(env, head, &arity, &tuple)
-            || tree->dimension != (uint64_t) arity) {
-            printf("error getting tuple\r\n");
-            return enif_make_badarg(env);
-        }
-
-        for (int j = 0; j<arity; j++) {
-            if (!enif_is_number(env, tuple[j])) return enif_make_badarg(env);
-        }
-
-        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &asdf))
-            return enif_make_badarg(env);
-
-        array[i].idx = asdf;
-
-        for (int j = 1; j<arity; j++) {
-            double inp;
-            if (!enif_get_double(env, tuple[j], &inp))
-                return enif_make_badarg(env);
-
-            array[i].x[j-1] = inp;
-
-        }
-
-        list = tail;
-        i++;
-    }
+    if ((result = fill_tree_from_plain_tuple(env, argv[0], tree)))
+        return result;
 
     tree->dimension--;
 
@@ -177,3 +194,5 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     return result;
 }
+
+

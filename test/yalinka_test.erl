@@ -2,6 +2,8 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-export([start/0, realdata/0]).
+
 -define(POINTS, [{0,  10.0, 10.0, 10.0},
                  {1,  10.0, 10.0,-10.0},
                  {2,  10.0,-10.0, 10.0},
@@ -16,6 +18,9 @@
 -define(WIKIPEDIA_TEST,
         [ {1, 2.0, 3.0}, {2, 5.0, 4.0}, {3, 9.0, 6.0},
           {4, 4.0, 7.0}, {5, 8.0, 1.0}, {6, 7.0, 2.0}]).
+
+start() ->
+    not_implemented_yet.
 
 size_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
@@ -33,7 +38,7 @@ root_test_() ->
      ?_assertEqual( yalinka:root(Ref), {ok,13,{1.0,1.0,1.0}} )
     ].
 
-wikipedia_test_() ->
+wikipedia_teest_() ->
     {ok, Ref} = yalinka:new(?WIKIPEDIA_TEST),
     [
      ?_assert(
@@ -43,13 +48,36 @@ wikipedia_test_() ->
         end)
     ].
 
-search_test_() ->
+search2_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     [
      ?_assertEqual( {ok, [{0, 0.0}]}, yalinka:search(Tree, {10.0, 10.0, 10.0}, 1)),
      ?_assertEqual( {ok, [{0, 1.0}]}, yalinka:search(Tree, {10.0, 10.0, 11.0}, 1)),
+     ?_assertEqual( {ok, [{0, 1.4142135623730951}]},
+                    yalinka:search(Tree, {10.0, 11.0, 11.0}, 1)),
+     ?_assertEqual( {ok, [{0, 1.7320508075688772}]},
+                    yalinka:search(Tree, {11.0, 11.0, 11.0}, 1)),
+     ?_assertEqual( {ok, [{0, 2.449489742783178}]},
+                    yalinka:search(Tree, {11.0, 11.0, 12.0}, 1))
+    ].
+
+search3_teest_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    [
      ?_assertEqual( {ok, [{2, 200.0}, {0, 200.0}, {4, 200.0}, {6, 200.0}]},
                     yalinka:search(Tree, {0.0, 0.0, 10.0}, 4)),
      ?_assertEqual( {ok, [{0, 50.0}, {2, 250.0}, {4, 250.0}]},
                     yalinka:search(Tree, {5.0, 5.0, 10.0}, 3) )
     ].
+
+realdata() ->
+    io:format("1. file -> ETS...~n", []),
+    {ok, IndexTableRef} = ets:file2tab("test/data/geonames.index"),
+    io:format("2. ETS -> term...~n", []),
+    RealData = [{Idx, X, Y, Z} || {Idx, {X, Y, Z}} <- ets:tab2list(IndexTableRef)],
+    io:format("3. term -> yalinka:new/1...~n", []),
+    {ok, Tree} = yalinka:new( RealData ),
+    io:format("4. ok!~n", []),
+    {ok, Size} = yalinka:size( Tree ),
+    io:format("5. size is ~p~n", [Size]),
+    ok.
