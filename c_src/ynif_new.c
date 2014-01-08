@@ -55,7 +55,76 @@ void print_tree(KD_TREE_T *tree)
     }
 }
 
-ERL_NIF_TERM fill_tree_from_plain_tuple(ErlNifEnv *env, ERL_NIF_TERM list, KD_TREE_T *tree )
+ERL_NIF_TERM inspect_first_cel( ErlNifEnv *env,
+                                 ERL_NIF_TERM list,
+                                 uint64_t *size, uint64_t *dim)
+{
+    unsigned int list_size;
+    ERL_NIF_TERM head, tail;
+
+    int arity;
+    const ERL_NIF_TERM *tuple;
+
+    if (!enif_get_list_cell(env, list, &head, &tail))
+        return enif_make_badarg(env);
+
+    if (!enif_get_tuple(env, head, &arity, &tuple))
+        return enif_make_badarg(env);
+
+    if (!enif_get_list_length(env, list, &list_size))
+        return enif_make_badarg(env);
+
+    *dim = (uint64_t) arity;
+
+    *size = (uint64_t) list_size;
+
+    return 0;
+}
+
+ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
+                                 ERL_NIF_TERM list,
+                                 KD_TREE_T *tree,
+                                 int *type)
+{
+    unsigned int list_size;
+    ERL_NIF_TERM head, tail;
+
+    int arity;
+    const ERL_NIF_TERM *tuple;
+
+    if (!enif_get_list_cell(env, list, &head, &tail))
+        return enif_make_badarg(env);
+
+    if (!enif_get_tuple(env, head, &arity, &tuple))
+        return enif_make_badarg(env);
+
+    if      (!enif_is_number(env, head)) *type = 1;
+    else if (!enif_is_tuple (env, head)) *type = 2;
+    else if (!enif_is_list  (env, head)) *type = 3;
+    else                                 *type = 0;
+
+    if (!enif_get_list_length(env, list, &list_size))
+        return enif_make_badarg(env);
+
+    /* don't forget to decrement it after we check all the tuples in a
+     * cycle below. I did it cause it seems stupid to decrement
+     * dimension everytime there when we compare arity of the tuple to
+     * the dimension. */
+    tree->dimension = (uint64_t) arity;
+
+    tree->size = (uint64_t) list_size;
+
+    return 0;
+}
+
+/*
+ * {Idx :: integer(), Coordinate :: float(), ...}
+ * size of the tuple in tree->dimension
+ * lenght of the list in tree->size
+ */
+ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
+                                         ERL_NIF_TERM list,
+                                         KD_TREE_T *tree )
 {
 
     ERL_NIF_TERM list_ptr, head, tail;
@@ -109,27 +178,25 @@ ERL_NIF_TERM fill_tree_from_plain_tuple(ErlNifEnv *env, ERL_NIF_TERM list, KD_TR
         i++;
     }
 
-    return 0;
 
+    tree->dimension--;
+
+    return 0;
 }
 
 /* create new kdtree from incoming list */
 ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 {
-    /* list */
-    unsigned int list_size;
-    ERL_NIF_TERM head, tail;
-
-    /* tuple */
-    int arity;
-    const ERL_NIF_TERM *tuple;
-
     /* resource reference term */
     ERL_NIF_TERM term;
 
     /* placeholder for resulting term, like {ok, Reference} */
     ERL_NIF_TERM result;
 
+    /* type of the argument */
+    int type;
+
+    /* new tree object */
     KD_TREE_T *tree;
 
     /* just to make sure. and to satisfy compiler dilemma
@@ -140,33 +207,15 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     tree = enif_alloc_resource(KDTREE_RESOURCE, sizeof(KD_TREE_T));
 
-    /* found out the arity of the first tuple in the list */
-    if (!enif_get_list_cell(env, argv[0], &head, &tail))
-        return enif_make_badarg(env);
-
-    if (!enif_get_tuple(env, head, &arity, &tuple))
-        return enif_make_badarg(env);
-
-    /* don't forget to decrement it after we check all the tuples in a
-     * cycle below. I did it cause it seems stupid to decrement
-     * dimension everytime there when we compare arity of the tuple to
-     * the dimension. */
-    tree->dimension = arity;
+    if ((result = inspect_first_cell(env, argv[0], tree, &type)))
+        return result;
 
 #ifdef DEBUG
     printf("detected dimension is %d\r\n", tree->dimension -1);
 #endif
 
-    /* get the length of the list */
-    if (!enif_get_list_length(env, argv[0], &list_size))
-        return enif_make_badarg(env);
-
-    tree->size = list_size;
-
     if ((result = fill_tree_from_plain_tuple(env, argv[0], tree)))
         return result;
-
-    tree->dimension--;
 
 #ifdef DEBUG
     print_tree(tree);
@@ -194,5 +243,3 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     return result;
 }
-
-
