@@ -61,10 +61,7 @@ ERL_NIF_TERM search3_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
         return enif_make_badarg(env);
 
     if (howmuch != 1)
-        return enif_make_tuple2(
-            env,
-            try_make_existing_atom(env, "error"),
-            try_make_existing_atom(env, "multiple_search_not_implemented"));
+        return not_implemented(env);
 
     return search_nearest( env, argv, howmuch );
 }
@@ -96,21 +93,22 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
         return enif_make_badarg(env);
 
-    if (!enif_is_tuple(env, argv[1])) return enif_make_badarg(env);
-
     if (!enif_is_number(env, argv[2])) return enif_make_badarg(env);
 
-    if (!enif_get_tuple(env, argv[1], &tuple_arity, &tuple) ||
-        tuple_arity != 3) return enif_make_badarg(env);
+    if (!enif_get_tuple(env, argv[1], &tuple_arity, &tuple))
+        return error2(env, "tuple_expected", enif_make_copy(env, argv[1]));
+
+    if (tree->dimension != (uint64_t) tuple_arity)
+        return error4 ( env, "invalid_dimension",
+                        enif_make_uint64(env, tree->dimension),
+                        enif_make_int(env, tuple_arity),
+                        enif_make_copy(env, argv[1]));
 
     if (!enif_get_uint64(env, argv[2], (ErlNifUInt64*) &howmuch))
         return enif_make_badarg(env);
 
     if (tree->size < 1)
-        return enif_make_tuple2(
-            env,
-            try_make_existing_atom(env, "error"),
-            try_make_existing_atom(env, "empty_tree"));
+        return error1( env, "empty_tree" );
 
     for (int i=0; i<tuple_arity; i++) {
         if (!enif_get_double(env, tuple[i], &point.x[i]))

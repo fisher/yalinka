@@ -89,7 +89,7 @@ static int init_mod(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
     int64_t arg;
 
 #ifdef DEBUG
-    printf("*** example_nif module init...\r\n");
+    printf("*** yalinka module init...\r\n");
 #endif
 
     /* if we cannot get int from load_info, module loading in erlang will fail */
