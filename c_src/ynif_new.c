@@ -55,31 +55,6 @@ void print_tree(KD_TREE_T *tree)
     }
 }
 
-ERL_NIF_TERM inspect_first_cel( ErlNifEnv *env,
-                                 ERL_NIF_TERM list,
-                                 uint64_t *size, uint64_t *dim)
-{
-    unsigned int list_size;
-    ERL_NIF_TERM head, tail;
-
-    int arity;
-    const ERL_NIF_TERM *tuple;
-
-    if (!enif_get_list_cell(env, list, &head, &tail))
-        return enif_make_badarg(env);
-
-    if (!enif_get_tuple(env, head, &arity, &tuple))
-        return enif_make_badarg(env);
-
-    if (!enif_get_list_length(env, list, &list_size))
-        return enif_make_badarg(env);
-
-    *dim = (uint64_t) arity;
-
-    *size = (uint64_t) list_size;
-
-    return 0;
-}
 
 ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
                                  ERL_NIF_TERM list,
