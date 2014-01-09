@@ -40,6 +40,11 @@
 
 extern char* gimme_string(ErlNifEnv*, ERL_NIF_TERM*, char*);
 extern ERL_NIF_TERM try_make_existing_atom(ErlNifEnv*, const char*);
+extern ERL_NIF_TERM error1(ErlNifEnv*, char*);
+extern ERL_NIF_TERM error2(ErlNifEnv*, char*, ERL_NIF_TERM);
+extern ERL_NIF_TERM error4(ErlNifEnv*, char*, ERL_NIF_TERM, ERL_NIF_TERM, ERL_NIF_TERM);
+extern ERL_NIF_TERM not_implemented(ErlNifEnv*);
+
 
 #endif
 

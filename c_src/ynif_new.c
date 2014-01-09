@@ -45,14 +45,21 @@
 /* just for debug purposes. please close your eyes, you don't see this */
 void print_tree(KD_TREE_T *tree)
 {
-    printf("got tree of size %"PRIu64", dimension %"PRIu64"\r\n",
-           tree->size, tree->dimension);
-    for (unsigned int i = 0; i< tree->size; i++) {
-        printf(" \\ [%"PRIu64"] (%g", tree->array[i].idx, tree->array[i].x[0]);
-        for (unsigned int j = 1; j< tree->dimension; j++) {
-            printf(", %g", tree->array[i].x[j]);
+    if (tree->size<10) {
+
+        printf("got tree of size %"PRIu64", dimension %"PRIu64"\r\n",
+               tree->size, tree->dimension);
+
+        for (unsigned int i = 0; i< tree->size; i++) {
+            printf(" \\ [%"PRIu64"] (%g", tree->array[i].idx, tree->array[i].x[0]);
+            for (unsigned int j = 1; j< tree->dimension; j++) {
+                printf(", %g", tree->array[i].x[j]);
+            }
+            printf(")\r\n");
         }
-        printf(")\r\n");
+    } else {
+        printf("got TOO BIG tree of size %"PRIu64", dimension %"PRIu64". NOT PRINTING.\r\n",
+               tree->size, tree->dimension);
     }
 }
 
@@ -75,10 +82,10 @@ ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
     const ERL_NIF_TERM *tuple, *tuple2;
 
     if (!enif_get_list_cell(env, list, &head, &tail))
-        return enif_make_badarg(env);
+        return error2(env, "list_expected", enif_make_copy(env, list));
 
     if (!enif_get_tuple(env, head, &arity, &tuple))
-        return enif_make_badarg(env);
+        return error2(env, "tuple_expected", enif_make_copy(env, head));
 
     if (enif_is_number(env, tuple[1])) {
 
@@ -95,7 +102,7 @@ ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
         *type = 2;
 
         if (!enif_get_tuple(env, tuple[1], &arity, &tuple2))
-            return enif_make_badarg(env);
+            return error2(env, "inner_tuple_expected", enif_make_copy(env, head));
 
         tree->dimension = (uint64_t) arity;
 
@@ -104,22 +111,29 @@ ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
         *type = 3;
 
         if (!enif_get_list_length(env, tuple[1], &list_size))
-            return enif_make_badarg(env);
+            return error2(env, "inner_list_expected", enif_make_copy(env, head));
 
         tree->dimension = (uint64_t) list_size;
 
     } else { *type = 0; tree->dimension = 0; }
 
+
     if (!enif_get_list_length(env, list, &list_size))
-        return enif_make_badarg(env);
-
-
-#ifdef DEBUG
-    printf("list length %d, detected type %d of input, dimension %" PRIu64 "\r\n",
-           list_size, *type, tree->dimension);
-#endif
+        return error1(env, "error_getting_list_length");
 
     tree->size = (uint64_t) list_size;
+
+    return 0;
+}
+
+
+ERL_NIF_TERM fill_node_tag( ErlNifEnv *env, ERL_NIF_TERM src, uint64_t *idx)
+{
+    if (!enif_is_number(env, src))
+        return error2( env, "number_expected", enif_make_copy(env, src));
+
+    if (!enif_get_uint64(env, src, idx))
+        return error2( env, "integer_expected", enif_make_copy(env, src));
 
     return 0;
 }
@@ -141,9 +155,11 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
     unsigned int i;
 
     int arity;
-    uint64_t idx;
+    /* uint64_t idx; */
 
     node_ptr array;
+
+    ERL_NIF_TERM result;
 
     /* should be de-allocated in d-tor */
     array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
@@ -155,33 +171,30 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
 
     while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
 
-        if (!enif_is_tuple(env, head)) return enif_make_badarg(env);
+        if (!enif_is_tuple(env, head))
+            return error2(env, "tuple_expected", enif_make_copy(env, head));
 
-        if (!enif_get_tuple(env, head, &arity, &tuple)
-            || tree->dimension != (uint64_t) arity) {
-            if (tree->dimension != (uint64_t) arity) {
-                return enif_make_tuple2(
-                    env,
-                    try_make_existing_atom(env, "error"),
-                    try_make_existing_atom(env, "invalid_dimension_in_data"));
-            } else {
-                return enif_make_badarg(env);
-            }
-        }
+        if (!enif_get_tuple(env, head, &arity, &tuple))
+            return error2(env, "getting_tuple", enif_make_copy(env, head));
 
-        for (int j = 0; j<arity; j++) {
-            if (!enif_is_number(env, tuple[j])) return enif_make_badarg(env);
-        }
+        if (tree->dimension != (uint64_t) arity)
+            return error4 ( env, "invalid_tuple_arity",
+                            enif_make_uint64(env, tree->dimension),
+                            enif_make_int(env, arity),
+                            enif_make_copy(env, head) );
 
-        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &idx))
-            return enif_make_badarg(env);
-
-        array[i].idx = idx;
+        if ((result = fill_node_tag(env, tuple[0], &array[i].idx)))
+            return result;
 
         for (int j = 1; j<arity; j++) {
             double inp;
-            if (!enif_get_double(env, tuple[j], &inp))
-                return enif_make_badarg(env);
+
+            if (!enif_get_double(env, tuple[j], (double*) &inp)) {
+                return error4(env, "invalid_node_spec",
+                              try_make_existing_atom(env, "float"),
+                              enif_make_copy(env, tuple[j]),
+                              enif_make_copy(env, head));
+            }
 
             array[i].x[j-1] = inp;
 
@@ -207,14 +220,13 @@ ERL_NIF_TERM fill_tree_from_tuple( ErlNifEnv *env,
                                    KD_TREE_T *tree )
 {
 
-    ERL_NIF_TERM list_ptr, head, tail;
+    ERL_NIF_TERM list_ptr, head, tail, result;
     const ERL_NIF_TERM *ext_tuple, *int_tuple;
 
     /* iterator */
     unsigned int i;
 
     int arity;
-    uint64_t idx;
 
     node_ptr array;
 
@@ -228,41 +240,31 @@ ERL_NIF_TERM fill_tree_from_tuple( ErlNifEnv *env,
 
     while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
 
-        if (!enif_is_tuple(env, head)) return enif_make_badarg(env);
-
         if (!enif_get_tuple(env, head, &arity, &ext_tuple))
-            return enif_make_badarg(env);
+            return error2(env, "tuple_expected", enif_make_copy(env, head));
 
         if (arity != 2)
-            return enif_make_tuple2(
-                env,
-                try_make_existing_atom(env, "error"),
-                try_make_existing_atom(env, "invalid_input_data"));
+            return error2(env, "expected_tuple2", enif_make_copy(env, head));
 
-        if (!enif_is_number(env, ext_tuple[0])) return enif_make_badarg(env);
-
-        if (!enif_get_uint64(env, ext_tuple[0], (ErlNifUInt64*) &idx))
-            return enif_make_badarg(env);
-
-        array[i].idx = idx;
+        if ((result = fill_node_tag(env, ext_tuple[0], &array[i].idx)))
+            return result;
 
         if (!enif_get_tuple(env, ext_tuple[1], &arity, &int_tuple))
-            return enif_make_badarg(env);
+            return error2(env, "tuple_expected", enif_make_copy(env, ext_tuple[1]));
 
         if (tree->dimension != (uint64_t) arity)
-            return enif_make_tuple2(
-                env,
-                try_make_existing_atom(env, "error"),
-                try_make_existing_atom(env, "invalid_dimension_in_data"));
-
-        for (int j = 0; j<arity; j++) {
-            if (!enif_is_number(env, int_tuple[j])) return enif_make_badarg(env);
-        }
+            return error4( env, "invalid_dimension_in_data",
+                            enif_make_uint64(env, tree->dimension),
+                            enif_make_int(env, arity),
+                            enif_make_copy(env, head) );
 
         for (int j = 0; j<arity; j++) {
             double inp;
-            if (!enif_get_double(env, int_tuple[j], &inp))
-                return enif_make_badarg(env);
+            if (!enif_get_double(env, int_tuple[j], (double*) &inp))
+                return error4(env, "invalid_node_spec",
+                              try_make_existing_atom(env, "float"),
+                              enif_make_copy(env, int_tuple[j]),
+                              enif_make_copy(env, head));
 
             array[i].x[j-1] = inp;
 
@@ -297,12 +299,11 @@ ERL_NIF_TERM fill_tree_from_list( ErlNifEnv *env,
     /* iterator */
     unsigned int i;
 
-    /* node tag */
-    uint64_t idx;
-
     /* inner list of points */
     ERL_NIF_TERM inner_list, ihead, itail;
     unsigned int list_size;
+
+    ERL_NIF_TERM result;
 
     node_ptr array;
 
@@ -319,62 +320,37 @@ ERL_NIF_TERM fill_tree_from_list( ErlNifEnv *env,
 
     while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
 
-        if (!enif_is_tuple(env, head)) return enif_make_badarg(env);
+        if (!enif_get_tuple(env, head, &arity, &tuple) || arity != 2)
+            return error2(env, "expected_tuple2", enif_make_copy(env, head));
 
-        if (!enif_get_tuple(env, head, &arity, &tuple))
-            return enif_make_badarg(env);
-
-        if (arity != 2)
-            return enif_make_tuple2(
-                env,
-                try_make_existing_atom(env, "error"),
-                try_make_existing_atom(env, "invalid_input_data"));
-
-        if (!enif_is_number(env, tuple[0])) return enif_make_badarg(env);
-
-        /* got first element of a tuple - should be tag (integer for now) */
-        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &idx))
-            return enif_make_badarg(env);
-
-        array[i].idx = idx;
+        if ((result = fill_node_tag(env, tuple[0], &array[i].idx)))
+            return result;
 
         /* get all the points from the inner list */
         if (!enif_get_list_length(env, tuple[1], &list_size))
-            return enif_make_badarg(env);
+            return error2(env, "inner_list_expected", enif_make_copy(env, head));
 
         if (tree->dimension != (uint64_t) list_size)
-            return enif_make_tuple2(
-                env,
-                try_make_existing_atom(env, "error"),
-                enif_make_tuple2(
-                    env,
-                    try_make_existing_atom(env, "invalid_dimension_in_data"),
-                    enif_make_list3(
-                        env,
-                        enif_make_tuple2(
-                            env,
-                            try_make_existing_atom(env, "expected"),
-                            enif_make_uint64(env, tree->dimension)),
-                        enif_make_tuple2(
-                            env,
-                            try_make_existing_atom(env, "got"),
-                            enif_make_uint(env, list_size)),
-                        enif_make_tuple2(
-                            env,
-                            try_make_existing_atom(env, "node"),
-                            enif_make_copy(env, head)))));
+            return error4 ( env,
+                            "invalid_dimension_in_data",
+                            enif_make_uint64(env, tree->dimension),
+                            enif_make_uint(env, list_size),
+                            enif_make_copy(env, head) );
+
 
         inner_list = tuple[1];
-
         j = 0;
         while (enif_get_list_cell(env, inner_list, &ihead, &itail)) {
 
             if (!enif_get_double(env, ihead, &inp))
-                return enif_make_badarg(env);
+                return error4(env, "invalid_node_spec",
+                              try_make_existing_atom(env, "float"),
+                              enif_make_copy(env, ihead),
+                              enif_make_copy(env, head));
 
             array[i].x[j] = inp;
 
-            inner_list = tail;
+            inner_list = itail;
             j++;
 
         }
@@ -411,10 +387,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     if (!enif_is_list(env, argv[0])) {
         if (enif_is_tuple(env, argv[0])) {
-            return enif_make_tuple2(
-                env,
-                try_make_existing_atom(env, "error"),
-                try_make_existing_atom(env, "not_implemented_yet"));
+            return not_implemented(env);
         } else return enif_make_badarg(env);
     }
 
@@ -424,7 +397,8 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
         return result;
 
 #ifdef DEBUG
-    printf("detected dimension is %" PRIu64 "\r\n", tree->dimension);
+    printf("list length %"PRIu64", detected type %d of input, dimension %"PRIu64"\r\n",
+           tree->size, type, (type == 1)? tree->dimension -1 : tree->dimension);
 #endif
 
     switch(type) {

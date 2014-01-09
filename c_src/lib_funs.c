@@ -96,7 +96,7 @@ char* gimme_string(ErlNifEnv *env, ERL_NIF_TERM *term, char *buff) {
  *         In: atom_name
  *        Out: atom in term
  */
-ERL_NIF_TERM try_make_existing_atom(ErlNifEnv * env, const char *atom_name) {
+ERL_NIF_TERM try_make_existing_atom(ErlNifEnv *env, const char *atom_name) {
 
     ERL_NIF_TERM atom;
 
@@ -105,6 +105,66 @@ ERL_NIF_TERM try_make_existing_atom(ErlNifEnv * env, const char *atom_name) {
     }
 
     return atom;
+}
+
+/*
+ * helper fun to return {error, Explanation}
+ */
+ERL_NIF_TERM error1(ErlNifEnv *env, char *explanation) {
+    return enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "error"),
+        try_make_existing_atom(env, explanation));
+}
+
+/*
+ * helper fun to return {error, {Explanation, Causing_term}}
+ */
+ERL_NIF_TERM error2(ErlNifEnv *env, char *explanation, ERL_NIF_TERM term) {
+    return enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "error"),
+        enif_make_tuple2(
+            env,
+            try_make_existing_atom(env, explanation),
+            term));
+}
+
+/*
+ * helper fun to return {error, {Explanation,
+ *                               [{expected, Expected},
+ *                                {got, Got},
+ *                                {term, Causing_term}]}}
+ */
+
+ERL_NIF_TERM error4 ( ErlNifEnv *env,
+                      char *explanation,
+                      ERL_NIF_TERM expected,
+                      ERL_NIF_TERM got,
+                      ERL_NIF_TERM term)
+{
+    return enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "error"),
+        enif_make_tuple2(
+            env,
+            try_make_existing_atom(env, explanation),
+            enif_make_list3(
+                env,
+                enif_make_tuple2( env, try_make_existing_atom(env, "expected"), expected),
+                enif_make_tuple2( env, try_make_existing_atom(env, "got"), got),
+                enif_make_tuple2( env, try_make_existing_atom(env, "term"), term ))));
+}
+
+/*
+ * helper function to return {error, not_implemented} back to erlang
+ */
+ERL_NIF_TERM not_implemented(ErlNifEnv *env)
+{
+    return enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "error"),
+        try_make_existing_atom(env, "not_implemented_yet"));
 }
 
 

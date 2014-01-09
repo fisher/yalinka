@@ -97,14 +97,14 @@ ERL_NIF_TERM root_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     ERL_NIF_TERM *point;
 
+    ERL_NIF_TERM result;
+
     if (argc != 1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **)&tree))
         return enif_make_badarg(env);
 
-    if (tree->size <1) return enif_make_tuple2( env,
-                                                try_make_existing_atom(env, "error"),
-                                                try_make_existing_atom(env, "empty_tree"));
+    if (tree->size <1) return error1 (env, "empty_tree");
 
     point = (ERL_NIF_TERM *) enif_alloc(sizeof(ERL_NIF_TERM) * tree->dimension);
 
@@ -112,11 +112,15 @@ ERL_NIF_TERM root_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         point[i] = enif_make_double(env, tree->root->x[i]);
     }
 
-    return enif_make_tuple3(
+    result = enif_make_tuple3(
         env,
         try_make_existing_atom(env, "ok"),
         enif_make_uint64(env, tree->root->idx),
         enif_make_tuple_from_array(env, point, tree->dimension));
+
+    enif_free(point);
+
+    return result;
 }
 
 ERL_NIF_TERM node_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
@@ -127,6 +131,8 @@ ERL_NIF_TERM node_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     ERL_NIF_TERM *point;
 
+    ERL_NIF_TERM result;
+
     if (argc != 2) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
@@ -134,22 +140,27 @@ ERL_NIF_TERM node_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     if (!enif_get_uint64(env, argv[1], &idx)) return enif_make_badarg(env);
 
-    if (tree->size < idx)
-        return enif_make_tuple2( env,
-                                 try_make_existing_atom(env, "error"),
-                                 try_make_existing_atom(env, "index out of range"));
+    if (tree->size < idx) return error2 (env, "index_out_of_range", idx);
 
     point = (ERL_NIF_TERM *) enif_alloc(sizeof(ERL_NIF_TERM) * tree->dimension);
 
     for (unsigned int i = 0; i<tree->dimension; i++) {
+
+#ifdef DEBUG
+        printf("double [%d] = %g\r\n", i, tree->array[idx].x[i]);
+#endif
         point[i] = enif_make_double(env, tree->array[idx].x[i]);
     }
 
-    return enif_make_tuple3(
+    result = enif_make_tuple3(
         env,
         try_make_existing_atom(env, "ok"),
         enif_make_uint64(env, tree->array[idx].idx),
         enif_make_tuple_from_array(env, point, tree->dimension));
+
+    enif_free(point);
+
+    return result;
 }
 
 
