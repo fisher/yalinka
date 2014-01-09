@@ -91,11 +91,7 @@ ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
 
         *type = 1;
 
-        /* don't forget to decrement it after we check all the tuples
-         * in a cycle below. I did it cause it seems stupid to
-         * decrement dimension everytime there when we compare arity
-         * of the tuple to the dimension. */
-        tree->dimension = (uint64_t) arity;
+        tree->dimension = (uint64_t) arity -1;
 
     } else if (enif_is_tuple (env, tuple[1])) {
 
@@ -168,6 +164,8 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
 
     i = 0;
     list_ptr = list;
+
+    tree->dimension++;
 
     while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
 
@@ -328,7 +326,8 @@ ERL_NIF_TERM fill_tree_from_list( ErlNifEnv *env,
 
         /* get all the points from the inner list */
         if (!enif_get_list_length(env, tuple[1], &list_size))
-            return error2(env, "inner_list_expected", enif_make_copy(env, head));
+            return error2(env, "inner_list_expected",
+                          enif_make_copy(env, head));
 
         if (tree->dimension != (uint64_t) list_size)
             return error4 ( env,
@@ -396,9 +395,14 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     if ((result = inspect_first_cell(env, argv[0], tree, &type)))
         return result;
 
+    printf("alloc %" PRIx64 " for %" PRIu64 "x%" PRIu64 "\r\n",
+           (unsigned long int) tree, tree->dimension, tree->size);
+
+
 #ifdef DEBUG
-    printf("list length %"PRIu64", detected type %d of input, dimension %"PRIu64"\r\n",
-           tree->size, type, (type == 1)? tree->dimension -1 : tree->dimension);
+    printf("list length %"PRIu64", detected type %d of input,"
+           " dimension %"PRIu64"\r\n",
+           tree->size, type, tree->dimension);
 #endif
 
     switch(type) {
@@ -423,7 +427,6 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     printf("indexing...");
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
-    tree->sorted = 1;
     printf("done.\r\n");
 
     print_tree(tree);

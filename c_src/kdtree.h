@@ -61,8 +61,6 @@ struct kd_node_t {
 
 #ifndef KDTREE_C
 
-extern node_ptr find_median(node_ptr start, node_ptr end, int idx);
-
 extern node_ptr make_tree(struct kd_node_t *t, int len, int i, int dim);
 
 extern int nearest( node_ptr root, node_ptr nd, int i, int dim,

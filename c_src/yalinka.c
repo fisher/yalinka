@@ -41,8 +41,8 @@
 #include "ynif_search.h"
 #include "ynif_other.h"
 
-static int  init_mod  (ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info);
-static void unload_mod(ErlNifEnv* env, void*  priv_data);
+static int  init_mod  (ErlNifEnv*, void** priv_data, ERL_NIF_TERM load_info);
+static void unload_mod(ErlNifEnv*, void*  priv_data);
 
 static ErlNifFunc nif_funcs[] = {
     /* fun, arity, c-fun */
@@ -71,11 +71,13 @@ void kdtree_dtor(ErlNifEnv* env, void* arg)
 {
   KD_TREE_T *handler = (KD_TREE_T *) arg;
 
-  printf("dtor entry\r\n");
+  printf("d-tor %" PRIx64 " for %" PRIu64 "x%" PRIu64 " started...",
+         (unsigned long int) handler, handler->dimension, handler->size);
 
   enif_free(handler->array);
 
-  /*enif_free(handler)*/;
+  printf("done\r\n");
+
 }
 
 
@@ -92,7 +94,8 @@ static int init_mod(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
     printf("*** yalinka module init...\r\n");
 #endif
 
-    /* if we cannot get int from load_info, module loading in erlang will fail */
+    /* if we cannot get int from load_info, module loading in erlang
+       will fail */
     if (!enif_get_int64(env, load_info, &arg)) {
         return 1;
     }
