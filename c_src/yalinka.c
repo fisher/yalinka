@@ -115,7 +115,7 @@ static int init_mod(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
     *priv_data = global_state;
 
 #ifdef DEBUG
-    printf("*** initialization done, load info: %d\r\n", arg);
+    printf("*** initialization done, load info: %" PRIu64 "\r\n", arg);
 #endif
     return 0;
 }

@@ -13,6 +13,25 @@
                  {6, -10.0,-10.0, 10.0},
                  {7, -10.0,-10.0,-10.0}]).
 
+-define(POINT1, [{0, { 10.0, 10.0, 10.0}},
+                 {1, { 10.0, 10.0,-10.0}},
+                 {2, { 10.0,-10.0, 10.0}},
+                 {3, { 10.0,-10.0,-10.0}},
+                 {4, {-10.0, 10.0, 10.0}},
+                 {5, {-10.0, 10.0,-10.0}},
+                 {6, {-10.0,-10.0, 10.0}},
+                 {7, {-10.0,-10.0,-10.0}}]).
+
+-define(POINT2, [{0, [ 10.0, 10.0, 10.0]},
+                 {1, [ 10.0, 10.0,-10.0]},
+                 {2, [ 10.0,-10.0, 10.0]},
+                 {3, [ 10.0,-10.0,-10.0]},
+                 {4, [-10.0, 10.0, 10.0]},
+                 {5, [-10.0, 10.0,-10.0]},
+                 {6, [-10.0,-10.0, 10.0]},
+                 {7, [-10.0,-10.0,-10.0]}]).
+
+
 -define(ROOT, [{11, 10.0,10.0,10.0}, {12, -10.0,-10.0,-10.0}, {13, 1.0,1.0,1.0}]).
 
 -define(WIKIPEDIA_TEST,
@@ -25,7 +44,15 @@ start() ->
 size_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     Size = yalinka:size(Tree),
-    [?_assertEqual(Size, {ok, length(?POINTS)})].
+    {ok, Tre1} = yalinka:new(?POINT1),
+    Siz1 = yalinka:size(Tre1),
+    %% {ok, Tre2} = yalinka:new(?POINT2),
+    %% Siz2 = yalinka:size(Tre2),
+    [
+     ?_assertEqual(Size, {ok, length(?POINTS)}),
+     ?_assertEqual(Siz1, {ok, length(?POINT1)})
+     %% ?_assertEqual(Siz2, {ok, length(?POINT2)})
+    ].
 
 clear_teest_() ->
     {ok, Tree} = yalinka:new(?POINTS),
