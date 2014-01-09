@@ -46,12 +46,12 @@ size_test_() ->
     Size = yalinka:size(Tree),
     {ok, Tre1} = yalinka:new(?POINT1),
     Siz1 = yalinka:size(Tre1),
-    %% {ok, Tre2} = yalinka:new(?POINT2),
-    %% Siz2 = yalinka:size(Tre2),
+    {ok, Tre2} = yalinka:new(?POINT2),
+    Siz2 = yalinka:size(Tre2),
     [
      ?_assertEqual(Size, {ok, length(?POINTS)}),
-     ?_assertEqual(Siz1, {ok, length(?POINT1)})
-     %% ?_assertEqual(Siz2, {ok, length(?POINT2)})
+     ?_assertEqual(Siz1, {ok, length(?POINT1)}),
+     ?_assertEqual(Siz2, {ok, length(?POINT2)})
     ].
 
 clear_teest_() ->

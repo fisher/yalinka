@@ -106,7 +106,7 @@ ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
         if (!enif_get_list_length(env, tuple[1], &list_size))
             return enif_make_badarg(env);
 
-        tree->dimension = (uint64_t) arity;
+        tree->dimension = (uint64_t) list_size;
 
     } else { *type = 0; tree->dimension = 0; }
 
@@ -190,7 +190,6 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
         list_ptr = tail;
         i++;
     }
-
 
     tree->dimension--;
 
@@ -284,13 +283,107 @@ ERL_NIF_TERM fill_tree_from_tuple( ErlNifEnv *env,
  */
 
 ERL_NIF_TERM fill_tree_from_list( ErlNifEnv *env,
-                                   ERL_NIF_TERM list,
-                                   KD_TREE_T *tree )
+                                  ERL_NIF_TERM list,
+                                  KD_TREE_T *tree )
 {
-    return enif_make_tuple2(
-        env,
-        try_make_existing_atom(env, "error"),
-        try_make_existing_atom(env, "not_implemented_yet"));
+
+    /* the whole list of tuples */
+    ERL_NIF_TERM list_ptr, head, tail;
+
+    /* placeholder for the tuple container and its arity */
+    const ERL_NIF_TERM *tuple;
+    int arity;
+
+    /* iterator */
+    unsigned int i;
+
+    /* node tag */
+    uint64_t idx;
+
+    /* inner list of points */
+    ERL_NIF_TERM inner_list, ihead, itail;
+    unsigned int list_size;
+
+    node_ptr array;
+
+    double inp;
+    int j;
+
+    /* should be de-allocated in d-tor */
+    array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
+
+    tree->array = array;
+
+    i = 0;
+    list_ptr = list;
+
+    while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
+
+        if (!enif_is_tuple(env, head)) return enif_make_badarg(env);
+
+        if (!enif_get_tuple(env, head, &arity, &tuple))
+            return enif_make_badarg(env);
+
+        if (arity != 2)
+            return enif_make_tuple2(
+                env,
+                try_make_existing_atom(env, "error"),
+                try_make_existing_atom(env, "invalid_input_data"));
+
+        if (!enif_is_number(env, tuple[0])) return enif_make_badarg(env);
+
+        /* got first element of a tuple - should be tag (integer for now) */
+        if (!enif_get_uint64(env, tuple[0], (ErlNifUInt64*) &idx))
+            return enif_make_badarg(env);
+
+        array[i].idx = idx;
+
+        /* get all the points from the inner list */
+        if (!enif_get_list_length(env, tuple[1], &list_size))
+            return enif_make_badarg(env);
+
+        if (tree->dimension != (uint64_t) list_size)
+            return enif_make_tuple2(
+                env,
+                try_make_existing_atom(env, "error"),
+                enif_make_tuple2(
+                    env,
+                    try_make_existing_atom(env, "invalid_dimension_in_data"),
+                    enif_make_list3(
+                        env,
+                        enif_make_tuple2(
+                            env,
+                            try_make_existing_atom(env, "expected"),
+                            enif_make_uint64(env, tree->dimension)),
+                        enif_make_tuple2(
+                            env,
+                            try_make_existing_atom(env, "got"),
+                            enif_make_uint(env, list_size)),
+                        enif_make_tuple2(
+                            env,
+                            try_make_existing_atom(env, "node"),
+                            enif_make_copy(env, head)))));
+
+        inner_list = tuple[1];
+
+        j = 0;
+        while (enif_get_list_cell(env, inner_list, &ihead, &itail)) {
+
+            if (!enif_get_double(env, ihead, &inp))
+                return enif_make_badarg(env);
+
+            array[i].x[j] = inp;
+
+            inner_list = tail;
+            j++;
+
+        }
+
+        list_ptr = tail;
+        i++;
+    }
+
+    return 0;
 }
 
 /*
@@ -316,7 +409,14 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
        '(parameter name omitted' vs 'unused variable' */
     if (argc != 1) return enif_make_badarg(env);
 
-    if (!enif_is_list(env, argv[0])) return enif_make_badarg(env);
+    if (!enif_is_list(env, argv[0])) {
+        if (enif_is_tuple(env, argv[0])) {
+            return enif_make_tuple2(
+                env,
+                try_make_existing_atom(env, "error"),
+                try_make_existing_atom(env, "not_implemented_yet"));
+        } else return enif_make_badarg(env);
+    }
 
     tree = enif_alloc_resource(KDTREE_RESOURCE, sizeof(KD_TREE_T));
 
@@ -370,3 +470,12 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     return result;
 }
+
+/*
+ * Local Variables:
+ * indent-tabs-mode: nil
+ * show-trailing-whitespace: t
+ * mode: c
+ * End:
+ *
+ */
