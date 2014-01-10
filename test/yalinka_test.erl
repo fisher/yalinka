@@ -61,6 +61,17 @@ wikipedia_test_() ->
         end)
     ].
 
+looong_test_() ->
+    random:seed(erlang:now()),
+    Data = [
+            {I, random:uniform(), random:uniform(), random:uniform()}
+            || I <- lists:seq(1, random:uniform(100)+1000) ],
+    {ok, Ref} = yalinka:new(Data),
+    [
+     ?_assertEqual( yalinka:size(Ref), {ok, length(Data)} ),
+     ?_assertEqual( yalinka:dimension(Ref), {ok, 3} )
+    ].
+
 search2_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     [
