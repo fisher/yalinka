@@ -264,7 +264,7 @@ ERL_NIF_TERM fill_tree_from_tuple( ErlNifEnv *env,
                               enif_make_copy(env, int_tuple[j]),
                               enif_make_copy(env, head));
 
-            array[i].x[j-1] = inp;
+            array[i].x[j] = inp;
 
         }
 

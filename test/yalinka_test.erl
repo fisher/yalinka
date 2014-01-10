@@ -61,15 +61,27 @@ wikipedia_test_() ->
         end)
     ].
 
+%% test yalinka:new/1 against random million points
+%% beware of prng entropy exhaustion
 looong_test_() ->
     random:seed(erlang:now()),
+    Dimension = 1+ random:uniform(2), %% dimension 2..3
+    Point = fun() ->
+                    [random:uniform() || _ <- lists:seq(1,Dimension)]
+            end,
     Data = [
-            {I, random:uniform(), random:uniform(), random:uniform()}
-            || I <- lists:seq(1, random:uniform(100)+1000) ],
+            {I, Point()}
+            || I <- lists:seq(1, random:uniform(10000) +1000000) ],
+    Dat1 = [
+            {I, list_to_tuple(Point())}
+            || I <- lists:seq(1, random:uniform(10000) +1000000) ],
     {ok, Ref} = yalinka:new(Data),
+    {ok, Re1} = yalinka:new(Dat1),
     [
      ?_assertEqual( yalinka:size(Ref), {ok, length(Data)} ),
-     ?_assertEqual( yalinka:dimension(Ref), {ok, 3} )
+     ?_assertEqual( yalinka:dimension(Ref), {ok, Dimension} ),
+     ?_assertEqual( yalinka:size(Re1), {ok, length(Dat1)} ),
+     ?_assertEqual( yalinka:dimension(Re1), {ok, Dimension} )
     ].
 
 search2_test_() ->
