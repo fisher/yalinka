@@ -155,4 +155,4 @@ shell: priv/lib/yalinka.so ebin/yalinka.beam
 #
 clean:
 	@rm -f pure *.o erl_crash.dump opensuse.spec c_src/TAGS $(SONIF)
-	@rm -rf ebin doc .eunit priv/lib obj $(DESTDIR)
+	@rm -rf ebin doc .eunit priv/lib obj $(DESTDIR)/$(PACKAGE)
