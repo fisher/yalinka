@@ -31,7 +31,7 @@
 %% @doc create new k-d tree object
 %% @end
 %%--------------------------------------------------------------------
--spec new([point()]) -> {ok, reference()}.
+-spec new([point()]) -> {ok, Tree::reference()} | {error, Reason::term()}.
 new(_Points) ->
     ?not_loaded.
 
@@ -40,7 +40,7 @@ new(_Points) ->
 %% @end
 %%--------------------------------------------------------------------
 -spec search(reference(), {float(), float(), float()}) ->
-                    {integer(), float()}.
+                    {Idx::integer(), Distance::float()}.
 search(_Tree, _Point) ->
     ?not_loaded.
 
@@ -50,7 +50,7 @@ search(_Tree, _Point) ->
 %% @end
 %%--------------------------------------------------------------------
 -spec search(reference(), {float(), float(), float()}, integer()) -> 
-                    [{integer(), float()}].
+                    [{Idx::integer(), Distance::float()}].
 search(_Tree, _Point, _N) ->
     ?not_loaded.
 
@@ -58,7 +58,8 @@ search(_Tree, _Point, _N) ->
 %% @doc return the quantity of a nodes in the Tree
 %% @end
 %%--------------------------------------------------------------------
--spec size(reference()) -> integer().
+-spec size(reference()) ->
+                  {ok, Size::integer()} | {error, Reason::term()}.
 size(_Tree) ->
     ?not_loaded.
 
@@ -67,7 +68,8 @@ size(_Tree) ->
 %%     given Tree
 %% @end
 %%--------------------------------------------------------------------
--spec dimension(reference()) -> integer().
+-spec dimension(reference()) ->
+                       {ok, Dimension::integer()} | {error, Reason::term()}.
 dimension(_Tree) ->
     ?not_loaded.
 
@@ -105,7 +107,7 @@ clear(_Ref) ->
 %% @doc module initialization
 %% @end
 %%--------------------------------------------------------------------
--spec init() -> ok | {error, any()}.
+-spec init() -> ok | {error, Reason::term()}.
 init() ->
     NifLocation =
 	filename:join( privplace(), "lib" ),
