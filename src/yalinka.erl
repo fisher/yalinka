@@ -12,7 +12,7 @@
 
 
 -export([
-         new/1, search/2, search/3,
+         new/1, search/2, search/3, gettree/1,
          size/1, dimension/1, root/1, node/2, clear/1]).
 
 
@@ -61,6 +61,15 @@ search(_Tree, _Point, _N) ->
 -spec size(reference()) ->
                   {ok, Size::integer()} | {error, Reason::term()}.
 size(_Tree) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @doc
+%% @end
+%%--------------------------------------------------------------------
+-spec gettree(reference()) ->
+                     {ok, [point()]} | {error, Reason::term()}.
+gettree(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------

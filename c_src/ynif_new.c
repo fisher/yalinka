@@ -395,11 +395,11 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     if ((result = inspect_first_cell(env, argv[0], tree, &type)))
         return result;
 
+#ifdef DEBUG
+
     printf("alloc %" PRIx64 " for %" PRIu64 "x%" PRIu64 "\r\n",
            (unsigned long int) tree, tree->dimension, tree->size);
 
-
-#ifdef DEBUG
     printf("list length %"PRIu64", detected type %d of input,"
            " dimension %"PRIu64"\r\n",
            tree->size, type, tree->dimension);

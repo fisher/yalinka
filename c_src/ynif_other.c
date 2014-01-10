@@ -164,6 +164,46 @@ ERL_NIF_TERM node_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 }
 
 
+ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree;
+
+    ERL_NIF_TERM *list, *point;
+
+    ERL_NIF_TERM result;
+
+    if (argc !=1) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return enif_make_badarg(env);
+
+    list = (ERL_NIF_TERM *) enif_alloc( sizeof(ERL_NIF_TERM) * tree->size );
+
+    point = (ERL_NIF_TERM *) enif_alloc(sizeof(ERL_NIF_TERM) * tree->dimension);
+
+    for (unsigned int i=0; i<tree->size; i++) {
+
+        for (unsigned int j=0; j<tree->dimension; j++) {
+            point[j] = enif_make_double(env, tree->array[i].x[j]);
+        }
+
+        list[i] = enif_make_tuple2(env,
+                                   enif_make_uint64(env, tree->array[i].idx),
+                                   enif_make_tuple_from_array(env, point, tree->dimension));
+
+    }
+
+    result = enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "ok"),
+        enif_make_list_from_array(env, list, tree->size));
+
+    enif_free(point);
+    enif_free(list);
+
+    return result;
+}
+
 /*
  * Local Variables:
  * indent-tabs-mode: nil

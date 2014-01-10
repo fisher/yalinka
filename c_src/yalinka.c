@@ -53,7 +53,8 @@ static ErlNifFunc nif_funcs[] = {
     {"search", 3, search3_nif},
     {"search", 2, search2_nif},
     {"root", 1, root_nif},
-    {"node", 2, node_nif}
+    {"node", 2, node_nif},
+    {"gettree", 1, gettree_nif}
 };
 
 ERL_NIF_INIT(yalinka, nif_funcs, &init_mod, NULL, NULL, &unload_mod)
@@ -71,12 +72,20 @@ void kdtree_dtor(ErlNifEnv* env, void* arg)
 {
   KD_TREE_T *handler = (KD_TREE_T *) arg;
 
+#ifdef DEBUG
+
   printf("d-tor %" PRIx64 " for %" PRIu64 "x%" PRIu64 " started...",
          (unsigned long int) handler, handler->dimension, handler->size);
 
   enif_free(handler->array);
 
   printf("done\r\n");
+
+#else
+
+  enif_free(handler->array);
+
+#endif
 
 }
 
