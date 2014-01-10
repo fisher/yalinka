@@ -43,8 +43,12 @@ clear_teest_() ->
 
 root_test_() ->
     {ok, Ref} = yalinka:new(?ROOT),
+    {ok, Type2} = yalinka:new([{I, {X,Y,Z}}||{I,X,Y,Z}<-?ROOT]),
+    {ok, Type3} = yalinka:new([{I, [X,Y,Z]}||{I,X,Y,Z}<-?ROOT]),
     [
-     ?_assertEqual( yalinka:root(Ref), {ok,13,{1.0,1.0,1.0}} )
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Ref)   ),
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Type2) ),
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Type3) )
     ].
 
 wikipedia_test_() ->
