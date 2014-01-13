@@ -107,7 +107,7 @@ $(PACKAGE)_test: test/$(PACKAGE)_test.erl
 
 eunit:	$(PACKAGE) $(PACKAGE)_test
 	erl -noinput -pa ebin \
-		-eval 'ok = eunit:test($(PACKAGE)_test)' \
+		-eval 'ok = eunit:test($(PACKAGE)_test, [verbose])' \
 		-s erlang halt
 
 proper: $(PACKAGE) $(PACKAGE)_test

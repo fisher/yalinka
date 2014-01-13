@@ -2,21 +2,41 @@
 
 ## Overview
 
-This is a library for Erlang language for operating on k-d trees.
+This is a library for Erlang language for operating on k-d trees, implemented as a set of erlang NIF (native implemented functions).
 
-(in progress since 27 dec 2013)
+For general information about k-d trees see [wikipedia article](http://en.wikipedia.org/wiki/K-d_tree).
+
+## Requirements
+
+ * Erlang R15 or later
+ * GCC, tested on 4.8
+ * libc with -lm (should be available on any linux distribution by default)
+ * GNU make
+
+The C sources made with --std=C99 --Wextra --pedantic so I believe it should be easy to adopt those sources for other environments.
+
+## Limitations
+
+ * Points are limited by IEEE 754 double-precission (64bit) boundaries.
+ * Node index is limited to uint64_t
 
 ## Installation
 
-TBD
+Just 'cd' to project directory and type 'make'. This should build the erlang application in 'ebin' directory and shared object file in 'priv/lib'.
 
-## Deployment
+Then set the 'DESTDIR' environment variable and type 'make install', like this:
 
-TBD
+<pre>
+cd yalinka
+make
+DESTDIR=/usr/lib/erlang/lib make install
+</pre>
+
+Don't forget to use 'gmake' if you're *bsd follower.
 
 ## Configuration
 
-TBD
+Currently have no any configuration options.
 
 ## Usage
 
