@@ -175,7 +175,7 @@ ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc !=1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return enif_make_badarg(env);
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
 
     list = (ERL_NIF_TERM *) enif_alloc( sizeof(ERL_NIF_TERM) * tree->size );
 

@@ -106,6 +106,17 @@ search3_teest_() ->
                     yalinka:search(Tree, {5.0, 5.0, 10.0}, 3) )
     ].
 
+gettree_test_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    Normalized = lists:sort([ {Idx, {X,Y,Z}} || {Idx, X,Y,Z} <- ?POINTS ]),
+    {ok, Tree2} = yalinka:new(Normalized),
+    {ok, Export1} = yalinka:gettree(Tree),
+    {ok, Export2} = yalinka:gettree(Tree2),
+    [
+     ?_assertEqual( Normalized, lists:sort(Export1) ),
+     ?_assertEqual( Normalized, lists:sort(Export2) )
+    ].
+
 realdata() ->
     io:format("1. file -> ETS...~n", []),
     {ok, IndexTableRef} = ets:file2tab("test/data/geonames.index"),
