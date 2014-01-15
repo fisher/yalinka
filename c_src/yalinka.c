@@ -52,6 +52,8 @@ static ErlNifFunc nif_funcs[] = {
     {"dimension", 1, dimension_nif},
     {"search", 3, search3_nif},
     {"search", 2, search2_nif},
+    {"store", 2, store_nif},
+    {"load", 1, load_nif},
     {"root", 1, root_nif},
     {"node", 2, node_nif},
     {"gettree", 1, gettree_nif}

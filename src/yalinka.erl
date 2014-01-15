@@ -12,7 +12,7 @@
 
 
 -export([
-         new/1, search/2, search/3, gettree/1,
+         new/1, search/2, search/3, gettree/1, store/2, load/1,
          size/1, dimension/1, root/1, node/2, clear/1]).
 
 
@@ -107,6 +107,24 @@ node(_Ref, _Idx) ->
 %%--------------------------------------------------------------------
 -spec clear(reference()) -> ok.
 clear(_Ref) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc store given Tree into specified File, built and indexed
+%% @end
+%%--------------------------------------------------------------------
+-spec store(reference(), string()) -> ok | {error, Reason::term()}.
+store(_Tree, _Filename) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc load the Tree from specified Filename, previously stored with store/2.
+%% @end
+%%--------------------------------------------------------------------
+-spec load(string()) -> {ok, Tree::reference()} | {error, Reason::term()}.
+load(_Filename) ->
     ?not_loaded.
 
 %%%===================================================================

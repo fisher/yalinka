@@ -41,7 +41,7 @@
  * helper fun. In: erlang atom() | binary() in *term
  *            Out: C-style null-terminated string in *buff or NULL if errors
  */
-char* gimme_string(ErlNifEnv *env, ERL_NIF_TERM *term, char *buff) {
+char* gimme_string(ErlNifEnv *env, const ERL_NIF_TERM *term, char *buff) {
 
   /* needed as a placeholder for binary */
   ErlNifBinary erlbin;

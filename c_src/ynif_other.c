@@ -204,6 +204,45 @@ ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return result;
 }
 
+ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree;
+
+    char *filename, *err;
+
+    FILE *file;
+
+    ERL_NIF_TERM *list, *point;
+
+    if (argc !=2 ) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+
+    if (NULL == gimme_string(env, &argv[1], filename))
+        error2(env, "invalid_filename", enif_make_copy(env, argv[1]));
+
+    file = fopen (filename, "w");
+
+    if (file == NULL)
+        return
+            /*strerror(errno, err, */
+            error2(env, "cannot_open_file", enif_make_copy(env, argv[1]));
+
+
+    enif_free(filename);
+
+    return try_make_existing_atom(env, "ok");
+}
+
+ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+
+    if (argc != 1) return enif_make_badarg(env);
+
+    return try_make_existing_atom(env, "ok");
+}
+
 /*
  * Local Variables:
  * indent-tabs-mode: nil
