@@ -58,7 +58,7 @@ For extremely large databases it is strongly advised to split data preparation a
 
 <pre>
 1> {ok, R} = yalinka:load("/home/fisher/erl/strikead/geoid/test/db/xperian").
-{ok,<<>>}
+{ok, _}
 2> yalinka:size(R).
 {ok,34244707}
 </pre>
