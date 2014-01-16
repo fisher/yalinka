@@ -35,10 +35,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <erl_nif.h>
 #include "yalinka.h"
 #include "lib_funs.h"
 #include "kdtree.h"
+
 
 ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -212,35 +214,98 @@ ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     FILE *file;
 
-    ERL_NIF_TERM *list, *point;
+    /* ERL_NIF_TERM *list, *point; */
 
     if (argc !=2 ) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
         return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
 
-    if (NULL == gimme_string(env, &argv[1], filename))
+    if (NULL == (filename = gimme_string(env, &argv[1], filename)))
         error2(env, "invalid_filename", enif_make_copy(env, argv[1]));
 
     file = fopen (filename, "w");
 
-    if (file == NULL)
+    if (file == NULL) {
+        err = strerror(errno);
         return
-            /*strerror(errno, err, */
-            error2(env, "cannot_open_file", enif_make_copy(env, argv[1]));
+            error3(env, "cannot_open_file",
+                   enif_make_copy(env, argv[1]),
+                   enif_make_string(env, err, ERL_NIF_LATIN1));
+    }
 
+    fwrite(tree, sizeof(KD_TREE_T), 1, file);
+
+    fwrite(tree->array, sizeof(KD_NODE_T), tree->size, file);
 
     enif_free(filename);
+
+    fclose(file);
 
     return try_make_existing_atom(env, "ok");
 }
 
 ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
+    KD_TREE_T *tree;
+
+    char *filename, *err;
+
+    FILE *file;
+
+    ERL_NIF_TERM rsrce_term;
+
+    size_t got;
 
     if (argc != 1) return enif_make_badarg(env);
 
-    return try_make_existing_atom(env, "ok");
+    if (NULL == (filename = gimme_string(env, &argv[0], filename)))
+        error2(env, "invalid_filename", enif_make_copy(env, argv[0]));
+
+    file = fopen (filename, "r");
+
+    if (file == NULL) {
+        err = strerror(errno);
+        return error3(
+            env, "cannot_open_file",
+            enif_make_copy(env, argv[0]),
+            enif_make_string(env, err, ERL_NIF_LATIN1));
+    }
+
+    tree = enif_alloc_resource(KDTREE_RESOURCE, sizeof(KD_TREE_T));
+
+    fread(tree, sizeof(KD_TREE_T), 1, file);
+
+    printf("read: size %"PRIu64" dimension %"PRIu64"\r\n", tree->size, tree->dimension);
+
+    tree->array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
+
+    got = fread(tree->array, sizeof(KD_NODE_T), tree->size, file);
+
+    printf("read: %lu\r\n", got);
+
+    fclose(file);
+
+#ifdef DEBUG
+    print_tree(tree);
+
+    printf("indexing...");
+    tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
+    printf("done.\r\n");
+
+    print_tree(tree);
+#else
+    tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
+#endif
+
+    rsrce_term = enif_make_resource(env, tree);
+
+    enif_release_resource(tree);
+
+    return enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "ok"),
+        rsrce_term);
 }
 
 /*

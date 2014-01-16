@@ -131,6 +131,20 @@ ERL_NIF_TERM error2(ErlNifEnv *env, char *explanation, ERL_NIF_TERM term) {
 }
 
 /*
+ * helper fun to return {error, {Explanation, Causing_term, Reply}}
+ */
+ERL_NIF_TERM error3(ErlNifEnv *env, char *explanation, ERL_NIF_TERM term, ERL_NIF_TERM reply) {
+    return enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "error"),
+        enif_make_tuple3(
+            env,
+            try_make_existing_atom(env, explanation),
+            term,
+            reply));
+}
+
+/*
  * helper fun to return {error, {Explanation,
  *                               [{expected, Expected},
  *                                {got, Got},

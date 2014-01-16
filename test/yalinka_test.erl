@@ -61,27 +61,15 @@ wikipedia_test_() ->
         end)
     ].
 
-%% test yalinka:new/1 against random million points
-%% beware of prng entropy exhaustion
-looong_test_() ->
-    random:seed(erlang:now()),
-    Dimension = 1+ random:uniform(2), %% dimension 2..3
-    Point = fun() ->
-                    [random:uniform() || _ <- lists:seq(1,Dimension)]
-            end,
-    Data = [
-            {I, Point()}
-            || I <- lists:seq(1, random:uniform(10000) +1000000) ],
-    Dat1 = [
-            {I, list_to_tuple(Point())}
-            || I <- lists:seq(1, random:uniform(10000) +1000000) ],
-    {ok, Ref} = yalinka:new(Data),
-    {ok, Re1} = yalinka:new(Dat1),
+storing_test_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
     [
-     ?_assertEqual( yalinka:size(Ref), {ok, length(Data)} ),
-     ?_assertEqual( yalinka:dimension(Ref), {ok, Dimension} ),
-     ?_assertEqual( yalinka:size(Re1), {ok, length(Dat1)} ),
-     ?_assertEqual( yalinka:dimension(Re1), {ok, Dimension} )
+     ?_assertEqual( ok, yalinka:store(Tree, "testfile-storing") ),
+     ?_assertEqual( begin
+                        {ok, Ref} = yalinka:load("testfile-storing"),
+                        yalinka:search(Ref, {10.0, 10.0, 11.0}, 1)
+                    end,
+                    yalinka:search(Tree, {10.0, 10.0, 11.0}, 1))
     ].
 
 search2_test_() ->
@@ -115,6 +103,30 @@ gettree_test_() ->
     [
      ?_assertEqual( Normalized, lists:sort(Export1) ),
      ?_assertEqual( Normalized, lists:sort(Export2) )
+    ].
+
+%% test yalinka:new/1 against random million points
+%% beware of prng entropy exhaustion
+looong_test_() ->
+    random:seed(erlang:now()),
+    Dimension = 1+ random:uniform(2), %% dimension 2..3
+    Point = fun() ->
+                    [random:uniform() || _ <- lists:seq(1,Dimension)]
+            end,
+    Data = [
+            {I, Point()}
+            || I <- lists:seq(1, random:uniform(10000) +1000000) ],
+    {ok, Ref} = yalinka:new(Data),
+    ok = yalinka:store(Ref, "testfile-million"),
+    {ok, Tree} = yalinka:load("testfile-million"),
+    RandomPoint = Point(),
+    [
+     ?_assertEqual( yalinka:size(Ref), {ok, length(Data)} ),
+     ?_assertEqual( yalinka:dimension(Ref), {ok, Dimension} ),
+     ?_assertEqual( yalinka:size(Ref), yalinka:size(Tree) ),
+     ?_assertEqual( yalinka:dimension(Ref), yalinka:dimension(Tree) ),
+     ?_assertEqual( yalinka:search(Ref, RandomPoint, 1),
+                    yalinka:search(Tree, RandomPoint, 1))
     ].
 
 realdata() ->
