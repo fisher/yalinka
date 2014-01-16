@@ -54,6 +54,17 @@ First, we need to create a tree object. This can be done by calling yalinka:new/
 
 Next, we can query the engine to find the nearest node in the given tree to the given point. This is done by calling yalinka:search(Tree, {X, Y, Z}, Count), where Tree is the reference returned by yalinka:new/1, Count is the number of first nearest Count nodes to find and {X, Y, Z} is a point specification - a tuple with floats inside. The function cal returns {ok, List}, where List is the list of tuples {Idx, Distance}. Idx was an index from node specification when the tree was built while the Distance is the distance between specified point and found node.
 
+For extremely large databases it is strongly advised to split data preparation and usage stages; at the first stage the data prepared should be stored to file using yalinka:store/2 and then, at the second stage, loaded by yalinka:load/1 into memory:
+
+<pre>
+1> {ok, R} = yalinka:load("/home/fisher/erl/strikead/geoid/test/db/xperian").
+{ok,<<>>}
+2> yalinka:size(R).
+{ok,34244707}
+</pre>
+
+On my local notebook it takes about 28 seconds to load 34 million points in 3d space. The beam process suddenly grows by 1.5 Gb in residential set memory =)
+
 ## Naming issues
 
 Since 'ekdtree' project already exists here on a github I choose

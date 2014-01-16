@@ -298,6 +298,8 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
 #endif
 
+    tree->ready = 1;
+
     rsrce_term = enif_make_resource(env, tree);
 
     enif_release_resource(tree);

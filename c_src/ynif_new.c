@@ -434,7 +434,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
 #endif
 
-    tree->sorted = 1;
+    tree->ready = 1;
 
     term = enif_make_resource(env, tree);
 

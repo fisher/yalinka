@@ -91,7 +91,9 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
     ERL_NIF_TERM result;
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return enif_make_badarg(env);
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+
+    if (!tree->ready) return error1(env, "not_ready");
 
     if (!enif_is_number(env, argv[2])) return enif_make_badarg(env);
 

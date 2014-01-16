@@ -47,7 +47,7 @@ typedef struct kd_tree_t KD_TREE_T;
 struct kd_tree_t {
     uint64_t size;         /* quontity of points/nodes in the array */
     uint64_t dimension;    /* arity of the point in the space */
-    int      sorted;       /* flag, set to 1 if tree indexed */
+    int      ready;        /* flag, set to 1 if tree indexed */
     node_ptr root;         /* pointer to the root of the tree */
     node_ptr array;        /* pointer to the array of nodes */
 };
