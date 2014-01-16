@@ -15,8 +15,15 @@
          new/1, search/2, search/3, gettree/1, store/2, load/1,
          size/1, dimension/1, root/1, node/2, clear/1]).
 
+-export_type([point/0, tag/0, tnode/0, tref/0]).
 
--type point() :: {integer(), float(), float(), float()}.
+-type tag() :: Idx::integer().
+
+-type point() :: [float()] | tuple(float()).
+
+-type tnode() :: {Tag::tag(), Point::point()}.
+
+-type tref() :: reference().
 
 
 -define(not_loaded, erlang:nif_error(not_loaded)).
@@ -31,7 +38,7 @@
 %% @doc create new k-d tree object
 %% @end
 %%--------------------------------------------------------------------
--spec new([point()]) -> {ok, Tree::reference()} | {error, Reason::term()}.
+-spec new([tnode()]) -> {ok, Tree::tref()} | {error, Reason::term()}.
 new(_Points) ->
     ?not_loaded.
 
@@ -39,8 +46,8 @@ new(_Points) ->
 %% @doc search for nearest point in the Tree to the given Point
 %% @end
 %%--------------------------------------------------------------------
--spec search(reference(), {float(), float(), float()}) ->
-                    {Idx::integer(), Distance::float()}.
+-spec search(tref(), point()) ->
+                    {Tag::tag(), Distance::float()}.
 search(_Tree, _Point) ->
     ?not_loaded.
 
@@ -49,7 +56,7 @@ search(_Tree, _Point) ->
 %% @see search/2
 %% @end
 %%--------------------------------------------------------------------
--spec search(reference(), {float(), float(), float()}, integer()) -> 
+-spec search(tref(), point(), integer()) -> 
                     [{Idx::integer(), Distance::float()}].
 search(_Tree, _Point, _N) ->
     ?not_loaded.
@@ -58,27 +65,26 @@ search(_Tree, _Point, _N) ->
 %% @doc return the quantity of a nodes in the Tree
 %% @end
 %%--------------------------------------------------------------------
--spec size(reference()) ->
+-spec size(tref()) ->
                   {ok, Size::integer()} | {error, Reason::term()}.
 size(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc export the tree
+%% @doc export the Tree into erlang Term
 %% @end
 %%--------------------------------------------------------------------
--spec gettree(reference()) ->
-                     {ok, [point()]} | {error, Reason::term()}.
+-spec gettree(tref()) -> {ok, Term::[tnode()]} | {error, Reason::term()}.
 gettree(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc return space dimension (arity of the point in space) for the
-%%     given Tree
+%% @doc return the space dimension (arity of the point in space) for
+%%     the given Tree
 %% @end
 %%--------------------------------------------------------------------
--spec dimension(reference()) ->
-                       {ok, Dimension::integer()} | {error, Reason::term()}.
+-spec dimension(tref()) -> {ok, Dimension::integer()} |
+                           {error, Reason::term()}.
 dimension(_Tree) ->
     ?not_loaded.
 
@@ -87,7 +93,7 @@ dimension(_Tree) ->
 %% @doc return the root of the Tree
 %% @end
 %%--------------------------------------------------------------------
--spec root(reference()) -> point().
+-spec root(tref()) -> Node::tnode().
 root(_Tree) ->
     ?not_loaded.
 
@@ -96,8 +102,8 @@ root(_Tree) ->
 %% @doc return the specified node of the unsorted tree
 %% @end
 %%--------------------------------------------------------------------
--spec node(reference(), integer()) -> point().
-node(_Ref, _Idx) ->
+-spec node(tref(), integer()) -> Node::tnode().
+node(_Tree, _Idx) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
@@ -105,25 +111,23 @@ node(_Ref, _Idx) ->
 %% @doc dummy. Now it is GC'ed
 %% @end
 %%--------------------------------------------------------------------
--spec clear(reference()) -> ok.
+-spec clear(tref()) -> ok.
 clear(_Ref) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @private
-%% @doc store given Tree into specified File, built and indexed
+%% @doc store the given Tree into specified File
 %% @end
 %%--------------------------------------------------------------------
--spec store(reference(), string()) -> ok | {error, Reason::term()}.
+-spec store(tref(), string()) -> ok | {error, Reason::term()}.
 store(_Tree, _Filename) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @private
 %% @doc load the Tree from specified Filename, previously stored with store/2.
 %% @end
 %%--------------------------------------------------------------------
--spec load(string()) -> {ok, Tree::reference()} | {error, Reason::term()}.
+-spec load(string()) -> {ok, Tree::tref()} | {error, Reason::term()}.
 load(_Filename) ->
     ?not_loaded.
 

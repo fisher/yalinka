@@ -221,7 +221,8 @@ ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
         return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
 
-    if (NULL == (filename = gimme_string(env, &argv[1], filename)))
+    filename = gimme_string(env, &argv[1]);
+    if (filename == NULL)
         error2(env, "invalid_filename", enif_make_copy(env, argv[1]));
 
     file = fopen (filename, "w");
@@ -259,7 +260,7 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     if (argc != 1) return enif_make_badarg(env);
 
-    if (NULL == (filename = gimme_string(env, &argv[0], filename)))
+    if (NULL == (filename = gimme_string(env, &argv[0])))
         error2(env, "invalid_filename", enif_make_copy(env, argv[0]));
 
     file = fopen (filename, "r");
@@ -276,24 +277,27 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     fread(tree, sizeof(KD_TREE_T), 1, file);
 
-    printf("read: size %"PRIu64" dimension %"PRIu64"\r\n", tree->size, tree->dimension);
+#ifdef DEBUG
+    printf("read, got header: size %"PRIu64" dimension %"PRIu64"\r\n",
+           tree->size, tree->dimension);
+#endif
 
     tree->array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
 
     got = fread(tree->array, sizeof(KD_NODE_T), tree->size, file);
 
-    printf("read: %lu\r\n", got);
+#ifdef DEBUG
+    printf("read, got the body: %lu\r\n", got);
+#endif
 
     fclose(file);
 
 #ifdef DEBUG
-    print_tree(tree);
 
     printf("indexing...");
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
     printf("done.\r\n");
 
-    print_tree(tree);
 #else
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
 #endif

@@ -38,7 +38,7 @@
 
 #include <erl_nif.h>
 
-extern char* gimme_string(ErlNifEnv*, const ERL_NIF_TERM*, char*);
+extern char* gimme_string(ErlNifEnv*, const ERL_NIF_TERM*);
 extern ERL_NIF_TERM try_make_existing_atom(ErlNifEnv*, const char*);
 extern ERL_NIF_TERM error1(ErlNifEnv*, char*);
 extern ERL_NIF_TERM error2(ErlNifEnv*, char*, ERL_NIF_TERM);
