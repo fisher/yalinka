@@ -38,7 +38,9 @@ print OUT <<EOS;
 \@version $version
 EOS
 
-my ($prev_line_is_empty, $is_empty, $unnumbered_list, $numbered_list);
+my ($prev_line_is_empty, $is_empty, $unnumbered_list, $numbered_list,
+    $paragraph) =
+  (0, 0, 0, 0, 0);
 
 # first pass. Determine structure, grab section names
 while (my $line = <IN>) {
@@ -47,6 +49,10 @@ while (my $line = <IN>) {
   $prev_line_is_empty = $is_empty;
   unless ($line =~ /^$/) { $is_empty = 0 }
   else {
+    if ($paragraph) {
+      push @out, "</p>";
+      $paragraph =0;
+    }
     if ( $unnumbered_list ) {
       $unnumbered_list = 0;
       push @out, "</ul>";
@@ -57,6 +63,12 @@ while (my $line = <IN>) {
       $is_empty = 1;
     }
     next;
+  };
+
+  $line =~ /^   / && do {
+    if ($paragraph) {push @out, "</p><p>";}
+    else {push @out, "<p>";}
+    $paragraph =1;
   };
 
   # headings, sections
