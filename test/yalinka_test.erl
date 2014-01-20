@@ -4,6 +4,8 @@
 
 -export([start/0, realdata/0]).
 
+-compile([export_all]).
+
 -define(POINTS, [{0,  10.0, 10.0, 10.0},
                  {1,  10.0, 10.0,-10.0},
                  {2,  10.0,-10.0, 10.0},
@@ -107,6 +109,8 @@ gettree_test_() ->
 
 %% test yalinka:new/1 against random million points
 %% beware of prng entropy exhaustion
+-define(aggregs, 1000).
+-define(million, 1000 * ?aggregs).
 looong_test_() ->
     random:seed(erlang:now()),
     Dimension = 1+ random:uniform(2), %% dimension 2..3
@@ -115,7 +119,7 @@ looong_test_() ->
             end,
     Data = [
             {I, Point()}
-            || I <- lists:seq(1, random:uniform(10000) +1000000) ],
+            || I <- lists:seq(1, random:uniform(10000) +?million) ],
     {ok, Ref} = yalinka:new(Data),
     ok = yalinka:store(Ref, "testfile-million"),
     {ok, Tree} = yalinka:load("testfile-million"),
@@ -126,7 +130,23 @@ looong_test_() ->
      ?_assertEqual( yalinka:size(Ref), yalinka:size(Tree) ),
      ?_assertEqual( yalinka:dimension(Ref), yalinka:dimension(Tree) ),
      ?_assertEqual( yalinka:search(Ref, RandomPoint, 1),
-                    yalinka:search(Tree, RandomPoint, 1))
+                    yalinka:search(Tree, RandomPoint, 1)),
+
+     %% effectivenes aggregated per thousand requests
+     ?_assert( 50 * ?aggregs >
+                   lists:foldl(
+                     fun(_,A) ->
+                             {ok, _, N} =
+                                 yalinka:search(Ref, list_to_tuple(Point()), debug),
+                             A + N
+                     end,
+                     0, lists:seq(1, ?aggregs))),
+     ?_assert( 50 * ?aggregs >
+                   lists:foldl(
+                     fun(_,A) -> {ok, _, N} =
+                                     yalinka:search(Tree, list_to_tuple(Point()), debug),
+                                 A + N
+                     end, 0, lists:seq(1, ?aggregs)))
     ].
 
 realdata() ->
@@ -140,3 +160,18 @@ realdata() ->
     {ok, Size} = yalinka:size( Tree ),
     io:format("5. size is ~p~n", [Size]),
     ok.
+
+reallyrandomfloat() ->
+    <<F/float>> = crypto:rand_bytes(8),
+    F.
+
+reallyrandompoint() ->
+    <<F1/float, F2/float, F3/float>> = crypto:rand_bytes(24),
+    {F1, F2, F3}.
+
+bump() ->
+    code:load_file(yalinka),
+    random:seed(now()),
+    {ok, T} = yalinka:load("/tmp/random-million"),
+    yalinka:search(T, reallyrandompoint()),
+    T.

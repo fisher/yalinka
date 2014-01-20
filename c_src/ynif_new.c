@@ -448,6 +448,25 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     return result;
 }
 
+ERL_NIF_TERM index_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
+{
+    KD_TREE_T *tree;
+
+    if(argc !=1) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+
+    tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
+
+    tree->ready = 1;
+
+    return enif_make_tuple2(
+        env,
+        try_make_existing_atom(env, "ok"),
+        enif_make_int(env, 123));
+}
+
 /*
  * Local Variables:
  * indent-tabs-mode: nil

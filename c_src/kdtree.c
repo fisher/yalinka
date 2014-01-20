@@ -44,14 +44,15 @@
 #include "kdtree.h"
 
 inline static double dist(node_ptr a, node_ptr b, int dim) {
-  double t, d = 0;
-  while (dim--) {
-    t = a->x[dim] - b->x[dim];
-    d += t * t;
-  }
-  return d;
+    double t, d = 0;
+    while (dim--) {
+        t = a->x[dim] - b->x[dim];
+        d += t * t;
+    }
+    return d;
 }
 
+/* swap the payload of two nodes */
 inline static void swap(node_ptr x, node_ptr y) {
   double tmp[MAX_DIM];
   uint64_t idx;
@@ -113,7 +114,7 @@ node_ptr make_tree(node_ptr tree, int len, int i, int dim) {
 
   if (!len) return 0;
 
-  if ((n = find_median(tree, tree + len, i))) {
+  if ( (n = find_median(tree, tree + len, i)) ) {
     i = (i + 1) % dim;
     n->left  = make_tree(tree, n - tree, i, dim);
     n->right = make_tree(n + 1, tree + len - (n + 1), i, dim);

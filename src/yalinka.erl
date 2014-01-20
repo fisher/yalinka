@@ -13,7 +13,7 @@
 
 -export([
          new/1, search/2, search/3, gettree/1, store/2, load/1,
-         size/1, dimension/1, root/1, node/2, clear/1]).
+         size/1, dimension/1, root/1, node/2, clear/1, index/1]).
 
 -export_type([point/0, tag/0, tnode/0, tref/0]).
 
@@ -129,6 +129,15 @@ store(_Tree, _Filename) ->
 %%--------------------------------------------------------------------
 -spec load(string()) -> {ok, Tree::tref()} | {error, Reason::term()}.
 load(_Filename) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc implicit call to reindex the tree (planned functionality)
+%% @end
+%%--------------------------------------------------------------------
+-spec index(tref()) -> {ok, NumVisited::integer()} | {error, Reason::term()}.
+index(_Tree) ->
     ?not_loaded.
 
 %%%===================================================================

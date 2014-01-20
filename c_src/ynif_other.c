@@ -138,7 +138,7 @@ ERL_NIF_TERM node_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 2) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return enif_make_badarg(env);
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
 
     if (!enif_get_uint64(env, argv[1], &idx)) return enif_make_badarg(env);
 
