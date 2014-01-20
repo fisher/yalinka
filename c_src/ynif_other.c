@@ -292,9 +292,15 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     fclose(file);
 
+    if (tree->size != got)
+        return error3(env, "file_stream_size_mismatch",
+                      enif_make_int(env, tree->size),
+                      enif_make_int(env, got));
+
 #ifdef DEBUG
 
     printf("indexing...");
+    fflush(stdout);
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
     printf("done.\r\n");
 
