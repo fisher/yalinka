@@ -87,6 +87,9 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
     node_ptr found;
     double best_dist;
 
+    /* placeholder for the list of what we're found */
+    ERL_NIF_TERM *list;
+
     /* placeholder for resulting term */
     ERL_NIF_TERM result;
 
@@ -94,8 +97,6 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
         return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
 
     if (!tree->ready) return error1(env, "not_ready");
-
-    if (!enif_is_number(env, argv[2])) return enif_make_badarg(env);
 
     if (!enif_get_tuple(env, argv[1], &tuple_arity, &tuple))
         return error2(env, "tuple_expected", enif_make_copy(env, argv[1]));
@@ -106,9 +107,6 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
                         enif_make_int(env, tuple_arity),
                         enif_make_copy(env, argv[1]));
 
-    if (!enif_get_uint64(env, argv[2], (ErlNifUInt64*) &howmuch))
-        return enif_make_badarg(env);
-
     if (tree->size < 1)
         return error1( env, "empty_tree" );
 
@@ -117,7 +115,9 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
             return enif_make_badarg(env);
     }
 
-    /* meat here */
+    list = (ERL_NIF_TERM *) enif_alloc( sizeof(ERL_NIF_TERM) * howmuch );
+
+     /* meat here */
 
     found = 0;
 
@@ -137,15 +137,17 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
     nearest ( tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
 #endif
 
+
+    list[0] = enif_make_tuple2( env,
+                                enif_make_uint64(env, found->idx),
+                                enif_make_double(env, sqrt(best_dist)));
+
     result = enif_make_tuple2(
         env,
         try_make_existing_atom(env, "ok"),
-        enif_make_list1(
-            env,
-            enif_make_tuple2 (
-                env,
-                enif_make_uint64(env, found->idx),
-                enif_make_double(env, sqrt(best_dist)))));
+        enif_make_list_from_array(env, list, howmuch));
+
+    enif_free(list);
 
     return result;
 }
