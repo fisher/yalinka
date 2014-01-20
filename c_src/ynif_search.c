@@ -42,13 +42,13 @@
 #include <stdio.h>
 
 
-ERL_NIF_TERM search_nearest(ErlNifEnv*, const ERL_NIF_TERM*, uint64_t);
+ERL_NIF_TERM search_nearest(ErlNifEnv*, const ERL_NIF_TERM*, uint64_t, int);
 
 ERL_NIF_TERM search2_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 {
     if (argc !=2) return enif_make_badarg(env);
 
-    return search_nearest( env, argv, 1 );
+    return search_nearest( env, argv, 1, 0 );
 }
 
 ERL_NIF_TERM search3_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
@@ -57,13 +57,15 @@ ERL_NIF_TERM search3_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     if (argc !=3) return enif_make_badarg(env);
 
+    if (enif_is_atom(env, argv[2])) return search_nearest(env, argv, 1, 1);
+
     if (!enif_get_uint64(env, argv[2], (ErlNifUInt64*) &howmuch))
         return enif_make_badarg(env);
 
     if (howmuch != 1)
         return not_implemented(env);
 
-    return search_nearest( env, argv, howmuch );
+    return search_nearest( env, argv, howmuch, 0 );
 }
 
 /* ********************************************************************** */
@@ -72,7 +74,9 @@ ERL_NIF_TERM search3_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
  * spec search(reference(), {float(), float(), float()}, integer()) ->
  *                     [{integer(), float()}].
  */
-ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t howmuch)
+ERL_NIF_TERM search_nearest(ErlNifEnv *env,
+                            const ERL_NIF_TERM *argv,
+                            uint64_t howmuch, int debug)
 {
     /* pointer to the tree */
     KD_TREE_T *tree;
@@ -86,6 +90,7 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
 
     node_ptr found;
     double best_dist;
+    int seen;
 
     /* placeholder for the list of what we're found */
     ERL_NIF_TERM *list;
@@ -125,16 +130,16 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
     printf("searching for (%g, %g, %g)\r\n",
            point.x[0], point.x[1], point.x[2]);
 
-    int visited =
+    seen =
         nearest(tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
 
     printf("search done.\r\nfor (%g, %g, %g) we've "
            "found (%g, %g, %g)\r\nidx %lu dist %g\r\nseen %d nodes\r\n\n",
            point.x[0], point.x[1], point.x[2],
            found->x[0], found->x[1], found->x[2], found->idx,
-           sqrt(best_dist), visited);
+           sqrt(best_dist), seen);
 #else
-    nearest ( tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
+    seen = nearest ( tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
 #endif
 
 
@@ -142,10 +147,17 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env, const ERL_NIF_TERM *argv, uint64_t h
                                 enif_make_uint64(env, found->idx),
                                 enif_make_double(env, sqrt(best_dist)));
 
-    result = enif_make_tuple2(
-        env,
-        try_make_existing_atom(env, "ok"),
-        enif_make_list_from_array(env, list, howmuch));
+    if (debug) {
+        result = enif_make_tuple3(
+            env, try_make_existing_atom(env, "ok"),
+            enif_make_list_from_array(env, list, howmuch),
+            enif_make_int(env, seen));
+    } else {
+        result = enif_make_tuple2(
+            env,
+            try_make_existing_atom(env, "ok"),
+            enif_make_list_from_array(env, list, howmuch));
+    }
 
     enif_free(list);
 
