@@ -28,7 +28,7 @@ Yalinka - erlang interface to k-d trees
 %define app_dir %{erl_lib_root}/%{name}-%{version}
 
 %prep
-%setup -n strikead-%{realname}-%{revision}
+%setup -n fisher-%{realname}-%{revision}
 
 %build
 OPENSUSE_MUST_DIE=true make $MAKEOPTS
