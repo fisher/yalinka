@@ -138,7 +138,7 @@ obj/pure.o: tools/pure.c
 pure: obj obj/pure.o
 	$(GCC) -o pure $(L_OPTS) obj/pure.o
 
-spec: opensuse.spec.in blob.spec.in
+spec: opensuse.spec.in
 	@echo "Creating rpm spec files..."
 	sed "s,{{VERSION}},$(VERSION),g; \
 	     s,{{RELEASE}},$(RELEASE),g; \

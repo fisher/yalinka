@@ -1,0 +1,54 @@
+%define realname yalinka
+%define revision {{REVISION}}
+
+Name:           strikead-%{realname}
+Summary:	Yalinka - erlang interface to k-d trees
+Version:        {{VERSION}}
+Release:        {{RELEASE}}
+License:        Proprietary
+Group:          StrikeAd/Software
+
+Source:         %{realname}-%{version}.tar.gz
+URL:            https://github.com/fisher/yalinka/tarball/%{revision}
+
+BuildArch:      x86_64
+
+Provides:       yalinka
+
+BuildRequires:  erlang make sed perl gcc-c++
+
+Requires:       erlang 
+Requires:       strikead-config >= 0.0.16
+Requires:	ntp
+
+%description
+Yalinka - erlang interface to k-d trees
+
+%define erl_lib_root /usr/%{_lib}/erlang/lib
+%define app_dir %{erl_lib_root}/%{name}-%{version}
+
+%prep
+%setup -n strikead-%{realname}-%{revision}
+
+%build
+OPENSUSE_MUST_DIE=true make $MAKEOPTS
+
+%install
+
+%{__mkdir} -p %{buildroot}/%{app_dir}/{ebin,priv/lib}
+
+for F in ebin/*.{beam,app}; do
+    G=${F##ebin/}
+    %{__install} -m 644 $F %{buildroot}/%{app_dir}/ebin/$G
+done
+
+%{__install} -m 644 priv/lib/yalinka.so %{buildroot}/%{app_dir}/priv/lib/yalinka.so
+
+%files
+%defattr(-,root,root)
+%{app_dir}/ebin/*
+%{app_dir}/priv/*
+
+%changelog
+* Tue Jan 21 2014 sergey.rybalchenko@strikead.com
+- initial try
