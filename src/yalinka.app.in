@@ -1,16 +1,15 @@
 {application, adtruth,
- [{description,"DeviceInsight AdTruth server-side library wrapper for erlang"},
+ [{description,"Erlang interface to k-d tree"},
   {vsn, "{{VERSION}}" },
   {registered,[]},
   {applications,
    [
     %%inets, bishop
    ]},
-  {mod,{adtruth_app,[]}},
   {env,[]},
   {modules,
    [
-    adtruth
+    yalinka
    ]}]}.
 
 % Local Variables:
