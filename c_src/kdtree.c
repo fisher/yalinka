@@ -43,7 +43,8 @@
 #define KDTREE_C
 #include "kdtree.h"
 
-inline static double dist(node_ptr a, node_ptr b, int dim) {
+inline static double dist(node_ptr a, node_ptr b, int dim)
+{
     double t, d = 0;
     while (dim--) {
         t = a->x[dim] - b->x[dim];
@@ -53,96 +54,101 @@ inline static double dist(node_ptr a, node_ptr b, int dim) {
 }
 
 /* swap the payload of two nodes */
-inline static void swap(node_ptr x, node_ptr y) {
-  double tmp[MAX_DIM];
-  uint64_t idx;
-  memcpy(tmp,  x->x, sizeof(tmp));
-  memcpy(x->x, y->x, sizeof(tmp));
-  memcpy(y->x, tmp,  sizeof(tmp));
-  idx = x->idx;
-  x->idx = y->idx;
-  y->idx = idx;
+inline static void swap(node_ptr x, node_ptr y)
+{
+    double tmp[MAX_DIM];
+    uint64_t idx;
+
+    memcpy(tmp,  x->x, sizeof(tmp));
+    memcpy(x->x, y->x, sizeof(tmp));
+    memcpy(y->x, tmp,  sizeof(tmp));
+
+    idx = x->idx;
+    x->idx = y->idx;
+    y->idx = idx;
 }
 
 /* see quickselect method */
-node_ptr find_median(node_ptr start, node_ptr end, int idx) {
-  node_ptr p;
-  node_ptr store;
-  node_ptr md;
+node_ptr find_median(node_ptr start, node_ptr end, int idx)
+{
+    node_ptr p;
+    node_ptr store;
+    node_ptr md;
 
-  double pivot;
+    double pivot;
 
-  if (end <= start) return NULL;
-  if (end == start + 1)
-    return start;
+    if (end <= start) return NULL;
+    if (end == start + 1)
+        return start;
 
-  md = start + (end - start) /2;
+    md = start + (end - start) /2;
 
-  while (1) {
-    pivot = md->x[idx];
+    while (1) {
+        pivot = md->x[idx];
 
-    swap(md, end - 1);
-    for (store = p = start; p < end; p++) {
-      if (p->x[idx] < pivot) {
-        if (p != store)
-          swap(p, store);
-        store++;
-      }
+        swap(md, end - 1);
+        for (store = p = start; p < end; p++) {
+            if (p->x[idx] < pivot) {
+                if (p != store)
+                    swap(p, store);
+                store++;
+            }
+        }
+        swap(store, end - 1);
+
+        /* median has duplicate values */
+        if (store->x[idx] == md->x[idx])
+            return md;
+
+        if (store > md)  end   = store;
+        else             start = store;
     }
-    swap(store, end - 1);
-
-    /* median has duplicate values */
-    if (store->x[idx] == md->x[idx])
-      return md;
-
-    if (store > md)  end   = store;
-    else             start = store;
-  }
 }
 
 
 /*
- * tree : ptr to the array of nodes
- * len  : the total size of an array
- * i    : should be set to the size of a single node
- * dim  : space dimension (arity of the point in space)
+ * array : ptr to the array of nodes
+ * len   : the number of nodes in array
+ * i     : should be set to 0 on initial call
+ * dim   : space dimension (arity of the point in space)
  *
  * returns pointer to the root of given tree
  */
-node_ptr make_tree(node_ptr tree, int len, int i, int dim) {
-  node_ptr n;
+node_ptr make_tree(node_ptr array, int len, int i, int dim)
+{
+    node_ptr n;
 
-  if (!len) return 0;
+    if (!len) return 0;
 
-  if ( (n = find_median(tree, tree + len, i)) ) {
-    i = (i + 1) % dim;
-    n->left  = make_tree(tree, n - tree, i, dim);
-    n->right = make_tree(n + 1, tree + len - (n + 1), i, dim);
-  }
-  return n;
+    if ( (n = find_median(array, array + len, i)) ) {
+        i = (i + 1) % dim;
+        n->left  = make_tree(array, n - array, i, dim);
+        n->right = make_tree(n + 1, array + len - (n + 1), i, dim);
+    }
+    return n;
 }
 
 
 /*
- * root : ptr to the root of the tree
- * nd   : point to look for
- * i    : index. on start should be set to 0
- * dim  : dimension, arity of the points
- * best : here we'll put down what we'll found
+ * root      : ptr to the root of the tree
+ * point     : point to look for
+ * i         : index. should be set to zero on initial call
+ * dim       : dimension, arity of the points
+ * best      : here we'll put down what we'll found
  * best_dist : here we'll put down the best distance, squared
- * counter   : just set it to 0 when call this
+ * counter   : just set it to 0 when call this function
  *
  * returns the number of visited nodes
  */
-int nearest( node_ptr root, node_ptr nd, int i, int dim,
+int nearest( node_ptr root, node_ptr point, int i, int dim,
              KD_NODE_T **best, double *best_dist, int counter ) {
 
   double d, dx, dx2;
   int visited = counter;
 
   if (!root) return visited;
-  d = dist(root, nd, dim);
-  dx = root->x[i] - nd->x[i];
+  d = dist(root, point, dim);
+  dx = root->x[i] - point->x[i];
   dx2 = dx * dx;
 
   visited ++;
@@ -157,9 +163,9 @@ int nearest( node_ptr root, node_ptr nd, int i, int dim,
 
   if (++i >= dim) i = 0;
 
-  visited = nearest(dx > 0 ? root->left : root->right, nd, i, dim, best, best_dist, visited);
+  visited = nearest(dx > 0 ? root->left : root->right, point, i, dim, best, best_dist, visited);
   if (dx2 >= *best_dist) return visited;
-  visited = nearest(dx > 0 ? root->right : root->left, nd, i, dim, best, best_dist, visited);
+  visited = nearest(dx > 0 ? root->right : root->left, point, i, dim, best, best_dist, visited);
 
   return visited;
 }
