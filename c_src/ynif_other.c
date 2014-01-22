@@ -206,6 +206,30 @@ ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return result;
 }
 
+ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree;
+
+    if (argc != 2) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+
+    return not_implemented(env);
+}
+
+ERL_NIF_TERM insert_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree;
+
+    if (argc != 2) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+
+    return not_implemented(env);
+}
+
 ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     KD_TREE_T *tree;

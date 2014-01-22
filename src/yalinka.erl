@@ -12,8 +12,12 @@
 
 
 -export([
-         new/1, search/2, search/3, gettree/1, store/2, load/1,
-         size/1, dimension/1, root/1, node/2, clear/1, index/1]).
+         new/1, search/2, search/3,
+         gettree/1, store/2, load/1,
+         size/1, dimension/1, root/1,
+         node/2, clear/1, index/1,
+         add/2, insert/2
+        ]).
 
 -export_type([point/0, tag/0, tnode/0, tref/0]).
 
@@ -89,6 +93,49 @@ dimension(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
+%% @doc store the given Tree into specified File
+%% @end
+%%--------------------------------------------------------------------
+-spec store(tref(), string()) -> ok | {error, Reason::term()}.
+store(_Tree, _Filename) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @doc load the Tree from specified Filename, previously stored with store/2.
+%% @end
+%%--------------------------------------------------------------------
+-spec load(string()) -> {ok, Tree::tref()} | {error, Reason::term()}.
+load(_Filename) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc implicit call to reindex the tree (planned functionality)
+%% @end
+%%--------------------------------------------------------------------
+-spec index(tref()) -> {ok, NumVisited::integer()} | {error, Reason::term()}.
+index(_Tree) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc append the new node(s) to the tree end
+%% @end
+%%--------------------------------------------------------------------
+-spec add(tref(), [tnode()] | tnode()) -> ok | {error, Reason::term()}.
+add(_TreeRef, _Points) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc insert the new node(s) to the tree
+%% @end
+%%--------------------------------------------------------------------
+-spec insert(tref(), [tnode()] | tnode()) -> ok | {error, Reason::term()}.
+insert(_Tree, _Points) ->
+    ?not_loaded.
+
+%%--------------------------------------------------------------------
 %% @private
 %% @doc return the root of the Tree
 %% @end
@@ -113,31 +160,6 @@ node(_Tree, _Idx) ->
 %%--------------------------------------------------------------------
 -spec clear(tref()) -> ok.
 clear(_Ref) ->
-    ?not_loaded.
-
-%%--------------------------------------------------------------------
-%% @doc store the given Tree into specified File
-%% @end
-%%--------------------------------------------------------------------
--spec store(tref(), string()) -> ok | {error, Reason::term()}.
-store(_Tree, _Filename) ->
-    ?not_loaded.
-
-%%--------------------------------------------------------------------
-%% @doc load the Tree from specified Filename, previously stored with store/2.
-%% @end
-%%--------------------------------------------------------------------
--spec load(string()) -> {ok, Tree::tref()} | {error, Reason::term()}.
-load(_Filename) ->
-    ?not_loaded.
-
-%%--------------------------------------------------------------------
-%% @private
-%% @doc implicit call to reindex the tree (planned functionality)
-%% @end
-%%--------------------------------------------------------------------
--spec index(tref()) -> {ok, NumVisited::integer()} | {error, Reason::term()}.
-index(_Tree) ->
     ?not_loaded.
 
 %%%===================================================================

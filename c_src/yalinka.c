@@ -57,6 +57,8 @@ static ErlNifFunc nif_funcs[] = {
     {"root", 1, root_nif},
     {"node", 2, node_nif},
     {"index", 1, index_nif},
+    {"add", 2, add_nif},
+    {"insert", 2, insert_nif},
     {"gettree", 1, gettree_nif}
 };
 

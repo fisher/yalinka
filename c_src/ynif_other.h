@@ -44,6 +44,8 @@ extern ERL_NIF_TERM node_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM gettree_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM store_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM load_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM add_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM insert_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 
 #endif
 
