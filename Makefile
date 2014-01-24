@@ -37,7 +37,7 @@ C_OPTS := -c -Wall -Wextra -pedantic -fpic -std=c99
 
 L_OPTS := -lm
 
-GCC := $(shell which colorgcc || which gcc48 ||echo gcc)
+GCC := $(shell which colorgcc || which gcc ||echo cc)
 
 ifneq ($(wildcard /usr/pbi/erlang-amd64/local/lib/erlang/usr/include/erl_nif.h),)
 	C_OPTS += -I/usr/pbi/erlang-amd64/local/lib/erlang/usr/include
@@ -97,7 +97,7 @@ ebin:
 	mkdir -p ebin
 
 ebin/%.beam: src/%.erl
-	erlc -o $@ -I include $(ERL_FLAGS) $<
+	erlc -o ebin -I include $(ERL_FLAGS) $<
 
 ebin/$(PACKAGE).app: ebin src/$(PACKAGE).app.in
 	sed "s/{{VERSION}}/$(VERSION)/" \
