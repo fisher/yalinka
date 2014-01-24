@@ -206,22 +206,6 @@ ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return result;
 }
 
-ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
-{
-    KD_TREE_T *tree;
-    
-	node_ptr array;
-
-    if (argc != 2) return enif_make_badarg(env);
-
-    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
-
-	array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
-
-    return not_implemented(env);
-}
-
 ERL_NIF_TERM insert_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     KD_TREE_T *tree;

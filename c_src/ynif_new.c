@@ -34,6 +34,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include <erl_nif.h>
 #include "yalinka.h"
@@ -360,6 +361,88 @@ ERL_NIF_TERM fill_tree_from_list( ErlNifEnv *env,
 
     return 0;
 }
+
+ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree;
+
+	node_ptr array;
+
+    unsigned int list_size;
+
+    ERL_NIF_TERM list_ptr, head, tail;
+
+    int tuple_arity;
+    const ERL_NIF_TERM *tuple;
+
+    int dim;
+    const ERL_NIF_TERM *int_tuple;
+
+    int i;
+    ERL_NIF_TERM result;
+
+    if (argc != 2) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+
+    if (!enif_get_list_length(env, argv[1], &list_size))
+        return error2(env, "list_expected", enif_make_copy(env, argv[1]));
+
+	array = enif_alloc(sizeof(KD_NODE_T) * (tree->size + list_size));
+
+    memcpy(array, tree->array, sizeof(KD_NODE_T) * tree->size);
+
+    i = tree->size;
+    list_ptr = argv[1];
+
+    while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
+
+        if (!enif_get_tuple(env, head, &tuple_arity, &tuple) || tuple_arity != 2) {
+            enif_free(array);
+            return error2(env, "expected_tuple2", enif_make_copy(env, head));
+        }
+
+        if((result = fill_node_tag(env, tuple[0], &array[i].idx))) {
+            enif_free(array);
+            return result;
+        }
+
+        if(!enif_get_tuple(env, tuple[1], &dim, &int_tuple)
+           || (unsigned int) dim != tree->dimension) {
+            enif_free(array);
+            return error4(env, "invalid_dimension_in_data",
+                          enif_make_uint64(env, tree->dimension),
+                          enif_make_int(env, dim),
+                          enif_make_copy(env, tuple[1]));
+        }
+
+        for (int j = 0; j<dim; j++) {
+            double inp;
+            if(!enif_get_double(env, int_tuple[j], (double*) &inp)) {
+                enif_free(array);
+                return error4(env, "invalid_node_spec",
+                              try_make_existing_atom(env, "float"),
+                              enif_make_copy(env, int_tuple[j]),
+                              enif_make_copy(env, head));
+            }
+            array[i].x[j] = inp;
+        }
+
+        list_ptr = tail;
+        i++;
+
+    }
+
+    enif_free(tree->array);
+
+    tree->array = array;
+    tree->size += list_size;
+    tree->ready = 0;
+
+    return try_make_existing_atom(env, "ok");
+}
+
 
 /*
  * create new kdtree object from incoming list. This is a function

@@ -39,6 +39,7 @@
 
 extern ERL_NIF_TERM new_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM index_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM add_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 
 #endif
 
