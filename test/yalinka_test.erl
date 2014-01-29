@@ -20,7 +20,9 @@
 
 -define(WIKIPEDIA_TEST,
         [ {1, 2.0, 3.0}, {2, 5.0, 4.0}, {3, 9.0, 6.0},
-          {4, 4.0, 7.0}, {5, 8.0, 1.0}, {6, 7.0, 2.0}]).
+          {4, 4.0, 7.0}, {5, 8.0, 1.0}, {6, 7.0, 2.0} ]).
+
+-define(MAXDIM, 3).
 
 start() ->
     not_implemented_yet.
@@ -147,6 +149,47 @@ looong_test_() ->
                                      yalinka:search(Tree, list_to_tuple(Point()), debug),
                                  A + N
                      end, 0, lists:seq(1, ?aggregs)))
+    ].
+
+addition_test_() ->
+    random:seed(erlang:now()),
+    Dimension = 1+ random:uniform(?MAXDIM -1),
+    Point = fun() -> [random:uniform() || _<- lists:seq(1,Dimension)] end,
+    RndData = [{I, Point()}||I<-lists:seq(1,random:uniform(1000))],
+    {ok, Ref} = yalinka:new(RndData),
+    AddData = [{I, list_to_tuple(Point())} || I<-lists:seq(1,random:uniform(1000))],
+    ok = yalinka:add(Ref, AddData),
+    [
+     ?_assertEqual( yalinka:size(Ref), {ok, length(RndData) + length(AddData)} ),
+     ?_assertEqual( yalinka:dimension(Ref), {ok, Dimension} ),
+     ?_assertEqual( yalinka:search(Ref, list_to_tuple(Point())), {error, not_ready} ),
+     ?_assert( begin
+                  yalinka:index(Ref),
+                  case yalinka:search(Ref, list_to_tuple(Point())) of
+                      {ok, [{I, _Dist}]}
+                        when is_integer(I) -> true;
+                      _ -> false
+                  end
+              end)
+    ].
+
+addition2_test_() ->
+    {ok, Ref} = yalinka:new(?POINTS),
+    ok = yalinka:add(Ref, [{I, {X,Y,Z}}||{I, X,Y,Z}<-?ROOT]),
+    yalinka:index(Ref),
+    [ ?_assertEqual( yalinka:search(Ref, {0.0,0.0,0.0}),
+                     {ok, [{13, 1.7320508075688772 }]}) ].
+
+index_test_() ->
+    {ok, R} = yalinka:new([{0, 0.0,0.0,0.0}]),
+    [
+     ?_assertEqual( yalinka:size(R), {ok, 1} ),
+     ?_assertEqual( yalinka:add(R, [{1, {1.0,1.0,1.0}}]), ok ),
+     ?_assertEqual( yalinka:size(R), {ok, 2} ),
+     ?_assertEqual( yalinka:search(R, {2.0,2.0,2.0}), {error, not_ready} ),
+     ?_assertEqual( yalinka:index(R), {ok, 2} ), %% now it fails
+     ?_assertEqual( yalinka:search(R, {2.0,2.0,2.0}),
+                    {ok, [{1, 1.7320508075688772 }]} )
     ].
 
 realdata() ->
