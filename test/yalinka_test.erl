@@ -168,6 +168,8 @@ addition_test_() ->
                     yalinka:dimension(Ref) ),
      ?_assertEqual( {error, not_ready},
                     yalinka:search(Ref, list_to_tuple(Point())) ),
+     ?_assertEqual( false,
+                    yalinka:is_ready(Ref)),
      ?_assert( begin
                   yalinka:index(Ref),
                   case yalinka:search(Ref, list_to_tuple(Point())) of
@@ -182,7 +184,9 @@ addition2_test_() ->
     {ok, Ref} = yalinka:new(?POINTS),
     [
      ?_assertEqual( ok, yalinka:add(Ref, [{I, {X,Y,Z}}||{I, X,Y,Z}<-?ROOT]) ),
+     ?_assertEqual( false, yalinka:is_ready(Ref) ),
      ?_assertEqual( {ok, 2}, yalinka:index(Ref) ),
+     ?_assertEqual( true, yalinka:is_ready(Ref) ),
      ?_assertEqual( {ok, [{13, math:sqrt(3) }]},
                     yalinka:search(Ref, {0.0,0.0,0.0}))
     ].
