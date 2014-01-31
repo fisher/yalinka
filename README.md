@@ -10,7 +10,7 @@ implemented as a set of erlang NIF (native implemented functions).
 ## Requirements
 
  * Erlang R15 or later
- * GCC, tested on 4.8
+ * GCC (tested on 4.8) or clang (tested on 3.3)
  * libc with -lm (should be available on any linux distribution by default)
  * GNU make
 
