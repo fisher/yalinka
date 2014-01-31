@@ -60,6 +60,19 @@ ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return result;
 }
 
+ERL_NIF_TERM is_ready_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree;
+
+    if (argc != 1) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+
+    if (tree->ready) return try_make_existing_atom(env, "true");
+    else return try_make_existing_atom(env, "false");
+}
+
 ERL_NIF_TERM clear_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     KD_TREE_T *tree;
