@@ -83,8 +83,13 @@ ERL_NIF_TERM compare_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     printf("the answer is %d\r\n", memcmp(tree1->array, tree2->array, sizeof(KD_NODE_T) * tree1->size));
 
-    if (memcmp(tree1->array, tree2->array, sizeof(KD_NODE_T) * tree1->size))
-        return try_make_existing_atom(env, "diff");
+
+    for (unsigned int i=0; i<tree1->size; i++) {
+        for (unsigned int j=0; j<tree1->dimension; j++) {
+            if ( tree1->array[i].x[j] != tree2->array[i].x[j] )
+                return try_make_existing_atom(env, "diff");
+        }
+    }
 
     return try_make_existing_atom(env, "equal");
 
