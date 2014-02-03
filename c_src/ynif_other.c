@@ -60,7 +60,6 @@ ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return result;
 }
 
-
 ERL_NIF_TERM compare_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     KD_TREE_T *tree1, *tree2;
@@ -79,12 +78,10 @@ ERL_NIF_TERM compare_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     if (tree1->ready != tree2->ready) return try_make_existing_atom(env, "diff");
 
-    printf("memsize %ld, ", sizeof(KD_NODE_T) * tree1->size);
-
-    printf("the answer is %d\r\n", memcmp(tree1->array, tree2->array, sizeof(KD_NODE_T) * tree1->size));
-
-
+    /* can't use memcmp because of pointers, need to traverse through */
     for (unsigned int i=0; i<tree1->size; i++) {
+        if ( tree1->array[i].idx != tree2->array[i].idx )
+            return try_make_existing_atom(env, "diff");
         for (unsigned int j=0; j<tree1->dimension; j++) {
             if ( tree1->array[i].x[j] != tree2->array[i].x[j] )
                 return try_make_existing_atom(env, "diff");
