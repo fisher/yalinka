@@ -219,16 +219,102 @@ ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return result;
 }
 
+/* this is just a quick and dirty hack. It allocates new memory,
+   copyes previos data to newly allocated memory, then adds new data
+   at the end of existing data and calls reindex function. Yes, it
+   will work, but it is inefficient and needs redo. */
 ERL_NIF_TERM insert_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     KD_TREE_T *tree;
+
+    ERL_NIF_TERM list_ptr, head, tail, result;
+    unsigned int list_size;
+
+    /* temp placeholder for array */
+    /* TODO: not to allocate new mem & copy existing tree array but
+       realloc the needed amount. The problem is that there is no
+       enif_realloc function, only enif_alloc */
+    node_ptr array;
+
+    /* placeholder for the outer tuple of size 2 */
+    const ERL_NIF_TERM *tuple;
+    int tuple_arity;
+
+    /* placeholder for the inner tuple with point */
+    const ERL_NIF_TERM *point_tuple;
+    int point_dim;
+
+    int i;
 
     if (argc != 2) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
         return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
 
-    return not_implemented(env);
+    if (!enif_get_list_length(env, argv[1], &list_size))
+        return error2(env, "list_expected", enif_make_copy(env, argv[1]));
+
+    array = enif_alloc(sizeof(KD_NODE_T) * tree->size + list_size);
+
+    memcpy(array, tree->array, sizeof(KD_NODE_T) * tree->size);
+
+    i = tree->size;
+    list_ptr = argv[1];
+
+    while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
+
+        if (!enif_get_tuple(env, head, &tuple_arity, &tuple)
+            || tuple_arity != 2) {
+            enif_free(array);
+            return error2(env, "expected_tuple2", enif_make_copy(env, head));
+        }
+
+        if ((result = fill_node_tag(env, tuple[0], &array[i].idx))) {
+            enif_free(array);
+            return result;
+        }
+
+        if (!enif_get_tuple(env, tuple[1], &point_dim, &point_tuple)
+            || (unsigned int) point_dim != tree->dimension) {
+            enif_free(array);
+            return error4(env, "invalid_dimension_in_data",
+                          enif_make_uint64(env, tree->dimension),
+                          enif_make_int(env, point_dim),
+                          enif_make_copy(env, tuple[1]));
+        }
+
+        for (int j=0; j<point_dim; j++) {
+            double fp;
+
+            if (!enif_get_double(env, point_tuple[j], (double*) &fp)) {
+                enif_free(array);
+                return error4(env, "invalid_node_spec",
+                              try_make_existing_atom(env, "float"),
+                              enif_make_copy(env, point_tuple[j]),
+                              enif_make_copy(env, head));
+            }
+
+            array[i].x[j] = fp;
+
+        }
+
+        list_ptr = tail;
+        i++;
+    }
+
+    /* at this point we have constructed array from previous data
+       concatenated with newly added data. Thus, we clear old
+       memory. Only reindex the new and then swap it up */
+
+    tree->root = make_tree( array, tree->size + list_size, 0, tree->dimension);
+
+    enif_free(tree->array);
+
+    tree->array = array;
+    tree->size += list_size;
+    tree->ready = 1;
+
+    return try_make_existing_atom(env, "ok");
 }
 
 ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
