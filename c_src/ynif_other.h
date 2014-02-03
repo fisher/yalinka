@@ -46,6 +46,7 @@ extern ERL_NIF_TERM store_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM load_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM insert_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 extern ERL_NIF_TERM is_ready_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM compare_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 
 #endif
 

@@ -60,6 +60,36 @@ ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     return result;
 }
 
+
+ERL_NIF_TERM compare_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    KD_TREE_T *tree1, *tree2;
+
+    if (argc != 2) return enif_make_badarg(env);
+
+    if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree1))
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+
+    if (!enif_get_resource(env, argv[1], KDTREE_RESOURCE, (void **) &tree2))
+        return error2(env, "invalid_reference", enif_make_copy(env, argv[1]));
+
+    if (tree1->size != tree2->size) return try_make_existing_atom(env, "diff");
+
+    if (tree1->dimension != tree2->dimension) return try_make_existing_atom(env, "diff");
+
+    if (tree1->ready != tree2->ready) return try_make_existing_atom(env, "diff");
+
+    printf("memsize %ld, ", sizeof(KD_NODE_T) * tree1->size);
+
+    printf("the answer is %d\r\n", memcmp(tree1->array, tree2->array, sizeof(KD_NODE_T) * tree1->size));
+
+    if (memcmp(tree1->array, tree2->array, sizeof(KD_NODE_T) * tree1->size))
+        return try_make_existing_atom(env, "diff");
+
+    return try_make_existing_atom(env, "equal");
+
+}
+
 ERL_NIF_TERM is_ready_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     KD_TREE_T *tree;

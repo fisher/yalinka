@@ -100,6 +100,18 @@ search3_teest_() ->
                     yalinka:search(Tree, {5.0, 5.0, 10.0}, 3) )
     ].
 
+compare_test_() ->
+    {ok, Tree1} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0},{4,4.0,4.0,4.0}]),
+    {ok, Tree2} = yalinka:new([{1,[1.0,1.0,1.0]},{2,[2.0,2.0,2.0]},{3,[3.0,3.0,3.0]},{4,[4.0,4.0,4.0]}]),
+    {ok, Tree3} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0}]),
+    {ok, Tree4} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0},{4,4.1,4.0,4.0}]),
+    [
+     ?_assertEqual( equal, yalinka:compare(Tree1,Tree2)),
+     ?_assertEqual( diff,  yalinka:compare(Tree2,Tree3)),
+     ?_assertEqual( diff,  yalinka:compare(Tree1,Tree4)),
+     ?_assertEqual( equal, yalinka:compare(Tree2,Tree1))
+    ].
+
 gettree_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     Normalized = lists:sort([ {Idx, {X,Y,Z}} || {Idx, X,Y,Z} <- ?POINTS ]),
