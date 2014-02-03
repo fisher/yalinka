@@ -1,0 +1,7 @@
+
+* Things that I believe should be done before 1.0 release
+** TODO true k-d with special workarounds for 2d and 3d
+** TODO index/1 should return spent time or traversed branches
+** TODO search/3 should return more than 1 point found
+** TODO add/2 should reallocate memory and not to copy old data
+** TODO insert/2 should be more outsmart to really insert, not just add and reindex
