@@ -6,4 +6,10 @@
 ** TODO add/2 should reallocate memory and not to copy old data
 ** TODO insert/2 should be more outsmart to really insert, not just add and reindex
 ** TODO remove/2 should remove specified nodes by ids from given tree
-** TODO compare/2 to compare two trees by its contents
+** DONE compare/2 to compare two trees by its contents                :0.6.0:
+** TODO usage examples
+** TODO augment and then refine documentation
+* Optional features
+** TODO alternative memory managing (GC off, explicit clear/1, configurable)
+** TODO application + gen_server with stored treerefs in state
+** TODO possibility to load/1 and index/1 in background
