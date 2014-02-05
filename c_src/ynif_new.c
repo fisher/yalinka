@@ -533,10 +533,7 @@ ERL_NIF_TERM index_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     tree->ready = 1;
 
-    return enif_make_tuple2(
-        env,
-        try_make_existing_atom(env, "ok"),
-        enif_make_int(env, 123));
+    return try_make_existing_atom(env, "ok");
 }
 
 /*

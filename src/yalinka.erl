@@ -111,10 +111,10 @@ load(_Filename) ->
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc implicit call to reindex the tree (planned functionality)
+%% @doc implicit call to reindex the tree
 %% @end
 %%--------------------------------------------------------------------
--spec index(tref()) -> {ok, NumVisited::integer()} | {error, Reason::term()}.
+-spec index(tref()) -> ok | {error, Reason::term()}.
 index(_Tree) ->
     ?not_loaded.
 
