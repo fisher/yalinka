@@ -20,7 +20,9 @@
 
 -define(WIKIPEDIA_TEST,
         [ {1, 2.0, 3.0}, {2, 5.0, 4.0}, {3, 9.0, 6.0},
-          {4, 4.0, 7.0}, {5, 8.0, 1.0}, {6, 7.0, 2.0}]).
+          {4, 4.0, 7.0}, {5, 8.0, 1.0}, {6, 7.0, 2.0} ]).
+
+-define(MAXDIM, 3).
 
 start() ->
     not_implemented_yet.
@@ -38,10 +40,6 @@ size_test_() ->
      ?_assertEqual(Siz2, {ok, length(?POINTS)})
     ].
 
-clear_teest_() ->
-    {ok, Tree} = yalinka:new(?POINTS),
-    Clear = yalinka:clear(Tree),
-    [?_assertEqual(Clear, ok)].
 
 root_test_() ->
     {ok, Ref} = yalinka:new(?ROOT),
@@ -77,23 +75,28 @@ storing_test_() ->
 search2_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     [
-     ?_assertEqual( {ok, [{0, 0.0}]}, yalinka:search(Tree, {10.0, 10.0, 10.0}, 1)),
-     ?_assertEqual( {ok, [{0, 1.0}]}, yalinka:search(Tree, {10.0, 10.0, 11.0}, 1)),
-     ?_assertEqual( {ok, [{0, 1.4142135623730951}]},
+     ?_assertEqual( {ok, [{0, 0.0}]},
+                    yalinka:search(Tree, {10.0, 10.0, 10.0}, 1)),
+     ?_assertEqual( {ok, [{0, 1.0}]},
+                    yalinka:search(Tree, {10.0, 10.0, 11.0}, 1)),
+     ?_assertEqual( {ok, [{0, math:sqrt(2)}]},
                     yalinka:search(Tree, {10.0, 11.0, 11.0}, 1)),
-     ?_assertEqual( {ok, [{0, 1.7320508075688772}]},
+     ?_assertEqual( {ok, [{0, math:sqrt(3)}]},
                     yalinka:search(Tree, {11.0, 11.0, 11.0}, 1)),
-     ?_assertEqual( {ok, [{0, 2.449489742783178}]},
+     ?_assertEqual( {ok, [{0, math:sqrt(6)}]},
                     yalinka:search(Tree, {11.0, 11.0, 12.0}, 1))
     ].
 
-search3_teest_() ->
-    {ok, Tree} = yalinka:new(?POINTS),
+compare_test_() ->
+    {ok, Tree1} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0},{4,4.0,4.0,4.0}]),
+    {ok, Tree2} = yalinka:new([{1,[1.0,1.0,1.0]},{2,[2.0,2.0,2.0]},{3,[3.0,3.0,3.0]},{4,[4.0,4.0,4.0]}]),
+    {ok, Tree3} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0}]),
+    {ok, Tree4} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0},{4,4.1,4.0,4.0}]),
     [
-     ?_assertEqual( {ok, [{2, 200.0}, {0, 200.0}, {4, 200.0}, {6, 200.0}]},
-                    yalinka:search(Tree, {0.0, 0.0, 10.0}, 4)),
-     ?_assertEqual( {ok, [{0, 50.0}, {2, 250.0}, {4, 250.0}]},
-                    yalinka:search(Tree, {5.0, 5.0, 10.0}, 3) )
+     ?_assertEqual( equal, yalinka:compare(Tree1,Tree2)),
+     ?_assertEqual( diff,  yalinka:compare(Tree2,Tree3)),
+     ?_assertEqual( diff,  yalinka:compare(Tree1,Tree4)),
+     ?_assertEqual( equal, yalinka:compare(Tree2,Tree1))
     ].
 
 gettree_test_() ->
@@ -148,6 +151,78 @@ looong_test_() ->
                                  A + N
                      end, 0, lists:seq(1, ?aggregs)))
     ].
+
+addition_test_() ->
+    random:seed(erlang:now()),
+    Dimension = 1+ random:uniform(?MAXDIM -1),
+    Point = fun() -> [random:uniform() || _<- lists:seq(1,Dimension)] end,
+    RndData = [{I, Point()}||I<-lists:seq(1,random:uniform(1000))],
+    {ok, Ref} = yalinka:new(RndData),
+    AddData = [{I, list_to_tuple(Point())} || I<-lists:seq(1,random:uniform(1000))],
+    ok = yalinka:add(Ref, AddData),
+    [
+     ?_assertEqual( {ok, length(RndData) + length(AddData)},
+                    yalinka:size(Ref) ),
+     ?_assertEqual( {ok, Dimension},
+                    yalinka:dimension(Ref) ),
+     ?_assertEqual( {error, not_ready},
+                    yalinka:search(Ref, list_to_tuple(Point())) ),
+     ?_assertEqual( false,
+                    yalinka:is_ready(Ref)),
+     ?_assert( begin
+                  yalinka:index(Ref),
+                  case yalinka:search(Ref, list_to_tuple(Point())) of
+                      {ok, [{I, _Dist}]}
+                        when is_integer(I) -> true;
+                      _ -> false
+                  end
+              end)
+    ].
+
+addition2_test_() ->
+    {ok, Ref} = yalinka:new(?POINTS),
+    [
+     ?_assertEqual( ok, yalinka:add(Ref, [{I, {X,Y,Z}}||{I, X,Y,Z}<-?ROOT]) ),
+     ?_assertEqual( false, yalinka:is_ready(Ref) ),
+     ?_assertEqual( ok, yalinka:index(Ref) ),
+     ?_assertEqual( true, yalinka:is_ready(Ref) ),
+     ?_assertEqual( {ok, [{13, math:sqrt(3) }]},
+                    yalinka:search(Ref, {0.0,0.0,0.0}))
+    ].
+
+index_test_() ->
+    {ok, R} = yalinka:new([{0, 0.0,0.0,0.0}]),
+    [
+     ?_assertEqual( {ok, 1}, yalinka:size(R) ),
+     ?_assertEqual( ok,      yalinka:add(R, [{1, {1.0,1.0,1.0}}]) ),
+     ?_assertEqual( {ok, 2}, yalinka:size(R) ),
+     ?_assertEqual( {error, not_ready}, yalinka:search(R, {2.0,2.0,2.0}) ),
+     ?_assertEqual( ok,      yalinka:index(R) ),
+     ?_assertEqual( {ok, [{1, math:sqrt(3) }]},
+                    yalinka:search(R, {2.0,2.0,2.0}) )
+    ].
+
+%% ----------------------------------------------------------------------
+%% optional features, ignored by now
+
+%% search for more than one nearest point
+search3_teest_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    [
+     ?_assertEqual( {ok, [{2, 200.0}, {0, 200.0}, {4, 200.0}, {6, 200.0}]},
+                    yalinka:search(Tree, {0.0, 0.0, 10.0}, 4)),
+     ?_assertEqual( {ok, [{0, 50.0}, {2, 250.0}, {4, 250.0}]},
+                    yalinka:search(Tree, {5.0, 5.0, 10.0}, 3) )
+    ].
+
+%% just a reminder about manual memory management feature
+clear_teest_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    Clear = yalinka:clear(Tree),
+    [?_assertEqual(Clear, ok)].
+
+%% ----------------------------------------------------------------------
+%% internal funs
 
 realdata() ->
     io:format("1. file -> ETS...~n", []),

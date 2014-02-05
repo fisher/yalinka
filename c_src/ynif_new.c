@@ -124,17 +124,6 @@ ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
 }
 
 
-ERL_NIF_TERM fill_node_tag( ErlNifEnv *env, ERL_NIF_TERM src, uint64_t *idx)
-{
-    if (!enif_is_number(env, src))
-        return error2( env, "number_expected", enif_make_copy(env, src));
-
-    if (!enif_get_uint64(env, src, idx))
-        return error2( env, "integer_expected", enif_make_copy(env, src));
-
-    return 0;
-}
-
 /*
  * {Idx :: integer(), Coordinate :: float(), ...}
  * size of the tuple in tree->dimension
@@ -544,10 +533,7 @@ ERL_NIF_TERM index_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     tree->ready = 1;
 
-    return enif_make_tuple2(
-        env,
-        try_make_existing_atom(env, "ok"),
-        enif_make_int(env, 123));
+    return try_make_existing_atom(env, "ok");
 }
 
 /*

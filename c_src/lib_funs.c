@@ -35,6 +35,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include <erl_nif.h>
 
 /*
@@ -92,6 +93,7 @@ char* gimme_string(ErlNifEnv *env, const ERL_NIF_TERM *term) {
 
   return buff;
 }
+
 
 /*
  * helper fun to prevent creation of the same atoms
@@ -181,6 +183,18 @@ ERL_NIF_TERM not_implemented(ErlNifEnv *env)
         env,
         try_make_existing_atom(env, "error"),
         try_make_existing_atom(env, "not_implemented_yet"));
+}
+
+
+ERL_NIF_TERM fill_node_tag(ErlNifEnv *env, ERL_NIF_TERM src, uint64_t *idx)
+{
+    if (!enif_is_number(env, src))
+        return error2( env, "number_expected", enif_make_copy(env, src));
+
+    if (!enif_get_uint64(env, src, idx))
+        return error2( env, "integer_expected", enif_make_copy(env, src));
+
+    return 0;
 }
 
 

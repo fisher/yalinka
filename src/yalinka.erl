@@ -16,7 +16,8 @@
          gettree/1, store/2, load/1,
          size/1, dimension/1, root/1,
          node/2, clear/1, index/1,
-         add/2, insert/2
+         add/2, insert/2, is_ready/1,
+         compare/2
         ]).
 
 -export_type([point/0, tag/0, tnode/0, tref/0]).
@@ -110,12 +111,21 @@ load(_Filename) ->
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc implicit call to reindex the tree (planned functionality)
+%% @doc implicit call to reindex the tree
 %% @end
 %%--------------------------------------------------------------------
--spec index(tref()) -> {ok, NumVisited::integer()} | {error, Reason::term()}.
+-spec index(tref()) -> ok | {error, Reason::term()}.
 index(_Tree) ->
     ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @doc return true if Tree is ready for queries, false otherwise
+%% @end
+%%--------------------------------------------------------------------
+-spec is_ready(tref()) -> true | false.
+is_ready(_Tree) ->
+    ?not_loaded.
+
 
 %%--------------------------------------------------------------------
 %% @private
@@ -134,6 +144,16 @@ add(_TreeRef, _Points) ->
 -spec insert(tref(), [tnode()] | tnode()) -> ok | {error, Reason::term()}.
 insert(_Tree, _Points) ->
     ?not_loaded.
+
+%%--------------------------------------------------------------------
+%% @private
+%% @doc compare given trees for equality
+%% @end
+%%--------------------------------------------------------------------
+-spec compare(tref(), tref()) -> equal | diff.
+compare(_Tree1, _Tree2) ->
+    ?not_loaded.
+
 
 %%--------------------------------------------------------------------
 %% @private
