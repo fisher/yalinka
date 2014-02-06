@@ -82,7 +82,7 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env,
     KD_TREE_T *tree;
 
     /* point taken from the args */
-    KD_NODE_T point;
+    NODE_3D_T point;
 
     /* temp placeholder for tuple and its arity */
     const ERL_NIF_TERM *tuple;

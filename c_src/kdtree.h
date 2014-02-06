@@ -40,8 +40,16 @@
 
 #define MAX_DIM 3
 
-typedef struct node_3d_t KD_NODE_T;
-typedef KD_NODE_T * node_ptr;
+typedef struct node_3d_t NODE_3D_T;
+typedef struct node_kd_t NODE_KD_T;
+
+typedef union real_node {
+    NODE_3D_T *node_3d;
+    NODE_KD_T *node_kd;
+} node_ptr_new;
+
+typedef NODE_3D_T * node_ptr;
+
 typedef struct kd_tree_t KD_TREE_T;
 
 struct kd_tree_t {
@@ -73,7 +81,7 @@ struct node_kd_t {
 extern node_ptr make_tree( node_ptr t, int len, int i, int dim);
 
 extern int nearest( node_ptr root, node_ptr nd, int i, int dim,
-             KD_NODE_T **best, double *best_dist, int counter );
+                    node_ptr *best, double *best_dist, int counter );
 
 #endif
 

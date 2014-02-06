@@ -43,6 +43,7 @@
 #define KDTREE_C
 #include "kdtree.h"
 
+
 inline static double dist(node_ptr a, node_ptr b, int dim)
 {
     double t, d = 0;
@@ -141,7 +142,7 @@ node_ptr make_tree(node_ptr array, int len, int i, int dim)
  * returns the number of visited nodes
  */
 int nearest( node_ptr root, node_ptr point, int i, int dim,
-             KD_NODE_T **best, double *best_dist, int counter ) {
+             node_ptr *best, double *best_dist, int counter ) {
 
   double d, dx, dx2;
   int visited = counter;

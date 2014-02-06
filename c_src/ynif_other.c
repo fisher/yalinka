@@ -227,16 +227,34 @@ ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     point = (ERL_NIF_TERM *) enif_alloc(sizeof(ERL_NIF_TERM) * tree->dimension);
 
-    for (unsigned int i=0; i<tree->size; i++) {
+    if (tree->dimension <= MAX_DIM) {
+        for (unsigned int i=0; i<tree->size; i++) {
 
-        for (unsigned int j=0; j<tree->dimension; j++) {
-            point[j] = enif_make_double(env, tree->array[i].x[j]);
+            for (unsigned int j=0; j<tree->dimension; j++) {
+                point[j] = enif_make_double(env, tree->array[i].x[j]);
+            }
+
+            list[i] = enif_make_tuple2(env,
+                                       enif_make_uint64(env, tree->array[i].idx),
+                                       enif_make_tuple_from_array(env, point, tree->dimension));
+
         }
+    } else {
+        for (unsigned int i=0; i<tree->size; i++) {
 
-        list[i] = enif_make_tuple2(env,
-                                   enif_make_uint64(env, tree->array[i].idx),
-                                   enif_make_tuple_from_array(env, point, tree->dimension));
+            for (unsigned int j=0; j<tree->dimension; j++) {
+                point[j] = enif_make_double(env,
+                                            /* should be: */
+                                            /*tree->array[i]->x[j]*/
+                                            tree->array[i].x[j]
+                                            );
+            }
 
+            list[i] = enif_make_tuple2(env,
+                                       enif_make_uint64(env, tree->array[i].idx),
+                                       enif_make_tuple_from_array(env, point, tree->dimension));
+
+        }
     }
 
     result = enif_make_tuple2(
@@ -285,9 +303,12 @@ ERL_NIF_TERM insert_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!enif_get_list_length(env, argv[1], &list_size))
         return error2(env, "list_expected", enif_make_copy(env, argv[1]));
 
-    array = enif_alloc(sizeof(KD_NODE_T) * tree->size + list_size);
-
-    memcpy(array, tree->array, sizeof(KD_NODE_T) * tree->size);
+    if (tree->dimension <= MAX_DIM) {
+        array = enif_alloc(sizeof(NODE_3D_T) * (tree->size + list_size));
+        memcpy(array, tree->array, sizeof(NODE_3D_T) * tree->size);
+    } else {
+        return not_implemented(env);
+    }
 
     i = tree->size;
     list_ptr = argv[1];
@@ -379,7 +400,13 @@ ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     fwrite(tree, sizeof(KD_TREE_T), 1, file);
 
-    fwrite(tree->array, sizeof(KD_NODE_T), tree->size, file);
+    if (tree->dimension <= MAX_DIM) {
+        fwrite(tree->array, sizeof(NODE_3D_T), tree->size, file);
+    } else {
+        enif_free(filename);
+        fclose(file);
+        return not_implemented(env);
+    }
 
     enif_free(filename);
 
@@ -424,9 +451,14 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
            tree->size, tree->dimension);
 #endif
 
-    tree->array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
+    if (tree->dimension <= MAX_DIM) {
+        tree->array = enif_alloc(sizeof(NODE_3D_T) * tree->size);
+        got = fread(tree->array, sizeof(NODE_3D_T), tree->size, file);
+    } else {
+        fclose(file);
+        return not_implemented(env);
+    }
 
-    got = fread(tree->array, sizeof(KD_NODE_T), tree->size, file);
 
 #ifdef DEBUG
     printf("read, got the body: %lu\r\n", got);

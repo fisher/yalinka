@@ -148,7 +148,11 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
     ERL_NIF_TERM result;
 
     /* should be de-allocated in d-tor */
-    array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
+    if (tree->dimension <= MAX_DIM) {
+        array = enif_alloc(sizeof(NODE_3D_T) * tree->size);
+    } else {
+        return not_implemented(env);
+    }
 
     tree->array = array;
 
@@ -219,7 +223,11 @@ ERL_NIF_TERM fill_tree_from_tuple( ErlNifEnv *env,
     node_ptr array;
 
     /* should be de-allocated in d-tor */
-    array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
+    if (tree->dimension <= MAX_DIM) {
+        array = enif_alloc(sizeof(NODE_3D_T) * tree->size);
+    } else {
+        return not_implemented(env);
+    }
 
     tree->array = array;
 
@@ -299,7 +307,11 @@ ERL_NIF_TERM fill_tree_from_list( ErlNifEnv *env,
     int j;
 
     /* should be de-allocated in d-tor */
-    array = enif_alloc(sizeof(KD_NODE_T) * tree->size);
+    if (tree->dimension <= MAX_DIM) {
+        array = enif_alloc(sizeof(NODE_3D_T) * tree->size);
+    } else {
+        return not_implemented(env);
+    }
 
     tree->array = array;
 
@@ -378,9 +390,13 @@ ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (!enif_get_list_length(env, argv[1], &list_size))
         return error2(env, "list_expected", enif_make_copy(env, argv[1]));
 
-	array = enif_alloc(sizeof(KD_NODE_T) * (tree->size + list_size));
+    if (tree->dimension <= MAX_DIM) {
+        array = enif_alloc(sizeof(NODE_3D_T) * (tree->size + list_size));
+        memcpy(array, tree->array, sizeof(NODE_3D_T) * tree->size);
+    } else {
+        return not_implemented(env);
+    }
 
-    memcpy(array, tree->array, sizeof(KD_NODE_T) * tree->size);
 
     i = tree->size;
     list_ptr = argv[1];
