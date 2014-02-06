@@ -119,7 +119,12 @@ index(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc return true if Tree is ready for queries, false otherwise
+%% @doc return true if Tree is ready for queries, false otherwise.
+%%    If this function returns false it means the Tree needs to be
+%%    reindexed, for example, after the call to add/2 or the process
+%%    of reindexing is currently ongoing in background and we need to
+%%    wait until it will be done. Until then the search/2 queries is
+%%    unable to perform.
 %% @end
 %%--------------------------------------------------------------------
 -spec is_ready(tref()) -> true | false.
@@ -128,8 +133,9 @@ is_ready(_Tree) ->
 
 
 %%--------------------------------------------------------------------
-%% @private
-%% @doc append the new node(s) to the tree end
+%% @doc append the new node(s) to the tree end.
+%%
+%%      NB: the add/2 call leaves the Tree in unindexed state.
 %% @end
 %%--------------------------------------------------------------------
 -spec add(tref(), [tnode()] | tnode()) -> ok | {error, Reason::term()}.
