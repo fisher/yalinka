@@ -46,6 +46,7 @@ extern ERL_NIF_TERM error2(ErlNifEnv*, char*, ERL_NIF_TERM);
 extern ERL_NIF_TERM error3(ErlNifEnv*, char*, ERL_NIF_TERM, ERL_NIF_TERM);
 extern ERL_NIF_TERM error4(ErlNifEnv*, char*, ERL_NIF_TERM, ERL_NIF_TERM, ERL_NIF_TERM);
 extern ERL_NIF_TERM not_implemented(ErlNifEnv*);
+extern ERL_NIF_TERM invalid_ref(ErlNifEnv*, ERL_NIF_TERM);
 extern ERL_NIF_TERM fill_node_tag(ErlNifEnv*, ERL_NIF_TERM, uint64_t*);
 
 

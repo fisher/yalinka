@@ -52,7 +52,7 @@ ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **)&tree))
-       return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     result = enif_make_tuple2( env,
                                try_make_existing_atom(env, "ok"),
@@ -67,7 +67,7 @@ ERL_NIF_TERM compare_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 2) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree1))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     if (!enif_get_resource(env, argv[1], KDTREE_RESOURCE, (void **) &tree2))
         return error2(env, "invalid_reference", enif_make_copy(env, argv[1]));
@@ -99,7 +99,7 @@ ERL_NIF_TERM is_ready_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     if (tree->ready) return try_make_existing_atom(env, "true");
     else return try_make_existing_atom(env, "false");
@@ -112,8 +112,7 @@ ERL_NIF_TERM clear_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
-
+        return invalid_ref(env, argv[0]);
 
     /* for now our resource objects are GC'ed automatically */
 
@@ -131,7 +130,7 @@ ERL_NIF_TERM dimension_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     return enif_make_tuple2( env,
                              try_make_existing_atom(env, "ok"),
@@ -149,7 +148,7 @@ ERL_NIF_TERM root_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **)&tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     if (tree->size <1) return error1 (env, "empty_tree");
 
@@ -183,7 +182,7 @@ ERL_NIF_TERM node_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 2) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     if (!enif_get_uint64(env, argv[1], &idx)) return enif_make_badarg(env);
 
@@ -222,7 +221,7 @@ ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc !=1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     list = (ERL_NIF_TERM *) enif_alloc( sizeof(ERL_NIF_TERM) * tree->size );
 
@@ -281,7 +280,7 @@ ERL_NIF_TERM insert_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 2) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     if (!enif_get_list_length(env, argv[1], &list_size))
         return error2(env, "list_expected", enif_make_copy(env, argv[1]));
@@ -362,7 +361,7 @@ ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc !=2 ) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     filename = gimme_string(env, &argv[1]);
     if (filename == NULL)

@@ -185,6 +185,15 @@ ERL_NIF_TERM not_implemented(ErlNifEnv *env)
         try_make_existing_atom(env, "not_implemented_yet"));
 }
 
+ERL_NIF_TERM invalid_ref(ErlNifEnv *env, ERL_NIF_TERM term)
+{
+    return enif_make_tuple2
+        (env,
+         try_make_existing_atom(env, "error"),
+         enif_make_tuple2 (env,
+                           try_make_existing_atom(env, "invalid_reference"),
+                           enif_make_copy(env, term)));
+}
 
 ERL_NIF_TERM fill_node_tag(ErlNifEnv *env, ERL_NIF_TERM src, uint64_t *idx)
 {

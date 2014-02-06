@@ -110,6 +110,33 @@ gettree_test_() ->
      ?_assertEqual( Normalized, lists:sort(Export2) )
     ].
 
+%% test for correct error reporting on invalid tree ref
+invalid_ref_test_() ->
+    [
+     ?_assertEqual( {error, {invalid_reference, atom}},
+                    yalinka:add(atom, [])),
+     ?_assertEqual( {error, {invalid_reference, <<"binary">>}},
+                    yalinka:index(<<"binary">>)),
+     ?_assertEqual( {error, {invalid_reference, "some_string"}},
+                    yalinka:is_ready("some_string")),
+     ?_assertEqual( {error, {invalid_reference, 123}},
+                    yalinka:compare(123, 3245)),
+     ?_assertEqual( {error, {invalid_reference, invalid_ref}},
+                    yalinka:compare(
+                      element(2, yalinka:new([{1,1.0,1.0,1.0}])),
+                      invalid_ref)),
+     ?_assertEqual( {error, {invalid_reference, asdf}},
+                    yalinka:size(asdf)),
+     ?_assertEqual( {error, {invalid_reference, qew}},
+                    yalinka:dimension(qew)),
+     ?_assertEqual( {error, {invalid_reference, love_street}},
+                    yalinka:gettree(love_street)),
+     ?_assertEqual( {error, {invalid_reference, "runrunrun"}},
+                    yalinka:insert("runrunrun", "runwithme")),
+     ?_assertEqual( {error, {invalid_reference, lizard_king}},
+                    yalinka:store(lizard_king, 1234))
+    ].
+
 %% test yalinka:new/1 against random million points
 %% beware of prng entropy exhaustion
 -define(aggregs, 1000).

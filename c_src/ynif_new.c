@@ -373,7 +373,7 @@ ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (argc != 2) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     if (!enif_get_list_length(env, argv[1], &list_size))
         return error2(env, "list_expected", enif_make_copy(env, argv[1]));
@@ -527,7 +527,7 @@ ERL_NIF_TERM index_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     if(argc !=1) return enif_make_badarg(env);
 
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
-        return error2(env, "invalid_reference", enif_make_copy(env, argv[0]));
+        return invalid_ref(env, argv[0]);
 
     tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
 
