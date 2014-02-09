@@ -130,6 +130,24 @@ node_ptr make_tree(node_ptr array, int len, int i, int dim)
 }
 
 
+node_ptr make_tree_cnt(node_ptr array, int len, int i, int dim)
+{
+    node_ptr n;
+    static int j;
+
+    if (i == 0) j = 0;
+    if (!len) return 0;
+
+    i++;
+    if ( (n = find_median(array, array +len, j)) ) {
+        j = i % dim;
+        /* printf ("i=%d, j=%d\r\n", i, j); */
+        n->left = make_tree_cnt(array, n -array, i, dim);
+        n->right = make_tree_cnt(n +1, array +len -(n+1), i, dim);
+    }
+    return n;
+}
+
 /*
  * root      : ptr to the root of the tree
  * point     : point to look for

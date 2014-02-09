@@ -80,6 +80,8 @@ struct node_kd_t {
 
 extern node_ptr make_tree( node_ptr t, int len, int i, int dim);
 
+extern node_ptr make_tree_cnt(node_ptr t, int len, int i, int dim);
+
 extern int nearest( node_ptr root, node_ptr nd, int i, int dim,
                     node_ptr *best, double *best_dist, int counter );
 
