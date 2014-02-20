@@ -42,6 +42,8 @@
 #include "kdtree.h"
 
 
+#define FMARK "yalinka1"
+
 ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
 
@@ -377,6 +379,8 @@ ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
                    enif_make_string(env, err, ERL_NIF_LATIN1));
     }
 
+    fwrite(FMARK, 8, 1, file);
+
     fwrite(tree, sizeof(KD_TREE_T), 1, file);
 
     fwrite(tree->array, sizeof(KD_NODE_T), tree->size, file);
@@ -391,6 +395,8 @@ ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     KD_TREE_T *tree;
+
+    char mark[8];
 
     char *filename, *err;
 
@@ -413,6 +419,15 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
             env, "cannot_open_file",
             enif_make_copy(env, argv[0]),
             enif_make_string(env, err, ERL_NIF_LATIN1));
+    }
+
+    fread(mark, 8, 1, file);
+
+    if (strncmp(mark, FMARK, 8)) {
+        fclose(file);
+        return error3(env, "file_version_mismatch",
+                      enif_make_copy(env, argv[0]),
+                      enif_make_string(env, mark, ERL_NIF_LATIN1));
     }
 
     tree = enif_alloc_resource(KDTREE_RESOURCE, sizeof(KD_TREE_T));
