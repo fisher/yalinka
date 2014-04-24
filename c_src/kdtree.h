@@ -53,9 +53,9 @@ typedef NODE_3D_T * node_ptr;
 typedef struct kd_tree_t KD_TREE_T;
 
 struct kd_tree_t {
-    uint64_t size;         /* quantity of points/nodes in the array */
-    uint64_t dimension;    /* arity of the point in the space */
-    int      ready;        /* flag, set to 1 if tree indexed */
+    uint64_t size;         /* quantity of points/nodes in the array, space size */
+    uint64_t dimension;    /* arity of the point in the space, space dimension */
+    int      ready;        /* readiness flag, set to 1 if tree is indexed */
     node_ptr root;         /* pointer to the root of the tree */
     node_ptr array;        /* pointer to the array of nodes */
 };
