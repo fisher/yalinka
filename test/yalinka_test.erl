@@ -150,20 +150,24 @@ looong_test_() ->
     Data = [
             {I, Point()}
             || I <- lists:seq(1, random:uniform(10000) +?million) ],
+
     {ok, Ref} = yalinka:new(Data),
     ok = yalinka:store(Ref, "testfile-million"),
     {ok, Tree} = yalinka:load("testfile-million"),
+
     RandomPoint = Point(),
+
+    RandomQueryData = [ list_to_tuple(Point()) || _ <- lists:seq(1, ?aggregs) ],
 
     EffectFun =
         fun(R) ->
                 lists:foldl(
-                  fun(_,A) ->
+                  fun(P,A) ->
                           {ok, _, N} =
-                              yalinka:search(R, list_to_tuple(Point()), debug),
+                              yalinka:search(R, P, debug),
                           A + N
                   end,
-                  0, lists:seq(1, ?aggregs))
+                  0, RandomQueryData)
         end,
 
     EffectNew = EffectFun(Ref),

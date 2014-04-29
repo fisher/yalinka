@@ -519,7 +519,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     print_tree(tree);
 #else
-    tree->root = make_tree( tree->array, tree->size, 0, tree->dimension);
+    tree->root = make_tree_cnt( tree->array, tree->size, 0, tree->dimension);
 #endif
 
     tree->ready = 1;
