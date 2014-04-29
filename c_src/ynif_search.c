@@ -88,7 +88,7 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env,
     const ERL_NIF_TERM *tuple;
     int tuple_arity;
 
-    node_ptr found;
+    node_3d_ptr found;
     double best_dist;
     int seen;
 

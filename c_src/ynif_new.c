@@ -143,7 +143,7 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
     int arity;
     /* uint64_t idx; */
 
-    node_ptr array;
+    node_3d_ptr array;
     node_kd_ptr kd_array;
     double  *pts;
 
@@ -244,7 +244,7 @@ ERL_NIF_TERM fill_tree_from_tuple( ErlNifEnv *env,
 
     int arity;
 
-    node_ptr array;
+    node_3d_ptr array;
 
     /* should be de-allocated in d-tor */
     if (tree->dimension <= MAX_DIM) {
@@ -325,7 +325,7 @@ ERL_NIF_TERM fill_tree_from_list( ErlNifEnv *env,
 
     ERL_NIF_TERM result;
 
-    node_ptr array;
+    node_3d_ptr array;
 
     double inp;
     int j;
@@ -391,7 +391,7 @@ ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     KD_TREE_T *tree;
 
-	node_ptr array;
+	node_3d_ptr array;
 
     unsigned int list_size;
 
@@ -539,13 +539,13 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
 
     printf("indexing...");
     tree->root.node_3d =
-        make_tree( tree->array.node_3d, tree->size, 0, tree->dimension);
+        make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
     printf("done.\r\n");
 
     print_tree(tree);
 #else
     tree->root.node_3d =
-        make_tree( tree->array.node_3d, tree->size, 0, tree->dimension);
+        make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
 #endif
 
     tree->ready = 1;
@@ -571,7 +571,7 @@ ERL_NIF_TERM index_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     if (!enif_get_resource(env, argv[0], KDTREE_RESOURCE, (void **) &tree))
         return invalid_ref(env, argv[0]);
 
-    tree->root.node_3d = make_tree( tree->array.node_3d, tree->size, 0, tree->dimension);
+    tree->root.node_3d = make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
 
     tree->ready = 1;
 

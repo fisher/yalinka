@@ -1,6 +1,6 @@
 
 * Things that I believe should be done before 1.0 release
-** TODO true k-d with special workarounds for 2d and 3d
+** TODO [#A] true k-d with special workarounds for 2d and 3d          :0.7.0:
 ** index/1 should return spent time or traversed branches             :0.6.0:
    - Note taken on [2014-04-29 Tue 15:22] \\
      not needed I believe. After some investigation I came to

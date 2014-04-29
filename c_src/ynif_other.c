@@ -285,7 +285,7 @@ ERL_NIF_TERM insert_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     /* TODO: not to allocate new mem & copy existing tree array but
        realloc the needed amount. The problem is that there is no
        enif_realloc function, only enif_alloc */
-    node_ptr array;
+    node_3d_ptr array;
 
     /* placeholder for the outer tuple of size 2 */
     const ERL_NIF_TERM *tuple;
@@ -360,7 +360,7 @@ ERL_NIF_TERM insert_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
        concatenated with newly added data. Thus, we clear old
        memory. Only reindex the new and then swap it up */
 
-    tree->root.node_3d = make_tree( array, tree->size + list_size, 0, tree->dimension);
+    tree->root.node_3d = make_tree_3d( array, tree->size + list_size, 0, tree->dimension);
 
     enif_free(tree->array.node_3d);
 
@@ -491,12 +491,12 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     printf("indexing...");
     fflush(stdout);
     tree->root.node_3d =
-        make_tree( tree->array.node_3d, tree->size, 0, tree->dimension);
+        make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
     printf("done.\r\n");
 
 #else
     tree->root.node_3d =
-        make_tree( tree->array.node_3d, tree->size, 0, tree->dimension);
+        make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
 #endif
 
     tree->ready = 1;

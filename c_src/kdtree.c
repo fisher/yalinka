@@ -44,7 +44,7 @@
 #include "kdtree.h"
 
 
-inline static double dist(node_ptr a, node_ptr b, int dim)
+inline static double dist(node_3d_ptr a, node_3d_ptr b, int dim)
 {
     double t, d = 0;
     while (dim--) {
@@ -55,7 +55,7 @@ inline static double dist(node_ptr a, node_ptr b, int dim)
 }
 
 /* swap the payload of two nodes */
-inline static void swap(node_ptr x, node_ptr y)
+inline static void swap(node_3d_ptr x, node_3d_ptr y)
 {
     double tmp[MAX_DIM];
     uint64_t idx;
@@ -70,11 +70,11 @@ inline static void swap(node_ptr x, node_ptr y)
 }
 
 /* see quickselect method */
-node_ptr find_median(node_ptr start, node_ptr end, int idx)
+node_3d_ptr find_median(node_3d_ptr start, node_3d_ptr end, int idx)
 {
-    node_ptr p;
-    node_ptr store;
-    node_ptr md;
+    node_3d_ptr p;
+    node_3d_ptr store;
+    node_3d_ptr md;
 
     double pivot;
 
@@ -115,17 +115,18 @@ node_ptr find_median(node_ptr start, node_ptr end, int idx)
  *
  * returns pointer to the root of given tree
  */
-node_ptr make_tree(node_ptr array, int len, int i, int dim)
+node_3d_ptr make_tree_3d(node_3d_ptr array, int len, int i, int dim)
 {
-    node_ptr n;
+    node_3d_ptr n;
 
     if (!len) return 0;
 
     if ( (n = find_median(array, array + len, i)) ) {
         i = (i + 1) % dim;
-        n->left  = make_tree(array, n - array, i, dim);
-        n->right = make_tree(n + 1, array + len - (n + 1), i, dim);
+        n->left  = make_tree_3d(array, n - array, i, dim);
+        n->right = make_tree_3d(n + 1, array + len - (n + 1), i, dim);
     }
+
     return n;
 }
 
@@ -140,8 +141,8 @@ node_ptr make_tree(node_ptr array, int len, int i, int dim)
  *
  * returns the number of visited nodes
  */
-int nearest( node_ptr root, node_ptr point, int i, int dim,
-             node_ptr *best, double *best_dist, int counter ) {
+int nearest( node_3d_ptr root, node_3d_ptr point, int i, int dim,
+             node_3d_ptr *best, double *best_dist, int counter ) {
 
   double d, dx, dx2;
   int visited = counter;

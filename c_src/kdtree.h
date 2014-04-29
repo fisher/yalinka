@@ -48,7 +48,7 @@ typedef union real_node {
     NODE_KD_T *node_kd;
 } uni_node;
 
-typedef NODE_3D_T * node_ptr;
+typedef NODE_3D_T * node_3d_ptr;
 typedef NODE_KD_T * node_kd_ptr;
 
 typedef struct kd_tree_t KD_TREE_T;
@@ -64,26 +64,26 @@ struct kd_tree_t {
 
 /* optimised for 2d & 3d */
 struct node_3d_t {
-    double x[MAX_DIM];
-    uint64_t idx;
-    node_ptr left;
-    node_ptr right;
+    double      x[MAX_DIM];
+    uint64_t    idx;
+    node_3d_ptr left;
+    node_3d_ptr right;
 };
 
 /* general case */
 struct node_kd_t {
-    double *x;
-    uint64_t idx;
-    node_ptr left;
-    node_ptr right;
+    double     *x;
+    uint64_t    idx;
+    node_kd_ptr left;
+    node_kd_ptr right;
 };
 
 #ifndef KDTREE_C
 
-extern node_ptr make_tree( node_ptr t, int len, int i, int dim);
+extern node_3d_ptr make_tree_3d( node_3d_ptr t, int len, int i, int dim);
 
-extern int nearest( node_ptr root, node_ptr nd, int i, int dim,
-                    node_ptr *best, double *best_dist, int counter );
+extern int nearest( node_3d_ptr root, node_3d_ptr nd, int i, int dim,
+                    node_3d_ptr *best, double *best_dist, int counter );
 
 #endif
 
