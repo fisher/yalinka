@@ -46,9 +46,10 @@ typedef struct node_kd_t NODE_KD_T;
 typedef union real_node {
     NODE_3D_T *node_3d;
     NODE_KD_T *node_kd;
-} node_ptr_new;
+} uni_node;
 
 typedef NODE_3D_T * node_ptr;
+typedef NODE_KD_T * node_kd_ptr;
 
 typedef struct kd_tree_t KD_TREE_T;
 
@@ -56,8 +57,9 @@ struct kd_tree_t {
     uint64_t size;         /* quantity of points/nodes in the array, space size */
     uint64_t dimension;    /* arity of the point in the space, space dimension */
     int      ready;        /* readiness flag, set to 1 if tree is indexed */
-    node_ptr root;         /* pointer to the root of the tree */
-    node_ptr array;        /* pointer to the array of nodes */
+    uni_node root;         /* pointer to the root of the tree */
+    uni_node array;        /* pointer to the array of nodes */
+    double  *pts;          /* pointer to the array of points for dimensions >3 */
 };
 
 /* optimised for 2d & 3d */
@@ -79,8 +81,6 @@ struct node_kd_t {
 #ifndef KDTREE_C
 
 extern node_ptr make_tree( node_ptr t, int len, int i, int dim);
-
-extern node_ptr make_tree_cnt(node_ptr t, int len, int i, int dim);
 
 extern int nearest( node_ptr root, node_ptr nd, int i, int dim,
                     node_ptr *best, double *best_dist, int counter );

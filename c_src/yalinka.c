@@ -84,13 +84,18 @@ void kdtree_dtor(ErlNifEnv* env, void* arg)
   printf("d-tor %" PRIx64 " for %" PRIu64 "x%" PRIu64 " started...",
          (unsigned long int) handler, handler->dimension, handler->size);
 
-  enif_free(handler->array);
+#endif
+
+  if (handler->dimension <= MAX_DIM) {
+      enif_free(handler->array.node_3d);
+  } else {
+      enif_free(handler->array.node_kd);
+      enif_free(handler->pts);
+  }
+
+#ifdef DEBUG
 
   printf("done\r\n");
-
-#else
-
-  enif_free(handler->array);
 
 #endif
 

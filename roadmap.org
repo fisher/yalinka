@@ -2,6 +2,17 @@
 * Things that I believe should be done before 1.0 release
 ** TODO true k-d with special workarounds for 2d and 3d
 ** index/1 should return spent time or traversed branches             :0.6.0:
+   - Note taken on [2014-04-29 Tue 15:22] \\
+     not needed I believe. After some investigation I came to
+     conclusion that if it will be really needed - it will be easier
+     to implement on the hi-level, I mean time measure. This is the
+     case when the process of indexing is taking a lot of time and
+     such a measurement is consuming comparatively small amount of cpu
+     time when compared to the indexing process itself. And when we're
+     talking about the amount of branches traversed this will reduce
+     the time to build a tree. When it comes to really significant
+     amounts of data (I mean millions of points) this measurement is
+     sensitive enough in means of consumed time.
    - Note taken on [2014-02-05 Wed 14:38] \\
      not sure if it needed or not
 ** TODO search/3 should return more than 1 point found

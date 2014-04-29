@@ -131,7 +131,7 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env,
            point.x[0], point.x[1], point.x[2]);
 
     seen =
-        nearest(tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
+        nearest(tree->root.node_3d, &point, 0, tree->dimension, &found, &best_dist, 0);
 
     printf("search done.\r\nfor (%g, %g, %g) we've "
            "found (%g, %g, %g)\r\nidx %lu dist %g\r\nseen %d nodes\r\n\n",
@@ -139,7 +139,7 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env,
            found->x[0], found->x[1], found->x[2], found->idx,
            sqrt(best_dist), seen);
 #else
-    seen = nearest ( tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
+    seen = nearest ( tree->root.node_3d, &point, 0, tree->dimension, &found, &best_dist, 0);
 #endif
 
 
