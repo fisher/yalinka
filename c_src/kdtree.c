@@ -130,6 +130,7 @@ node_3d_ptr make_tree_3d(node_3d_ptr array, int len, int i, int dim)
     return n;
 }
 
+
 /*
  * root      : ptr to the root of the tree
  * point     : point to look for
