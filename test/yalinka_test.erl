@@ -154,15 +154,24 @@ looong_test_() ->
     ok = yalinka:store(Ref, "testfile-million"),
     {ok, Tree} = yalinka:load("testfile-million"),
     RandomPoint = Point(),
-    Effect =
-        lists:foldl(
-          fun(_,A) ->
-                  {ok, _, N} =
-                      yalinka:search(Ref, list_to_tuple(Point()), debug),
-                  A + N
-          end,
-          0, lists:seq(1, ?aggregs)),
-    io:format(user, "Effectiveness: ~p~n", [Effect]),
+
+    EffectFun =
+        fun(R) ->
+                lists:foldl(
+                  fun(_,A) ->
+                          {ok, _, N} =
+                              yalinka:search(R, list_to_tuple(Point()), debug),
+                          A + N
+                  end,
+                  0, lists:seq(1, ?aggregs))
+        end,
+
+    EffectNew = EffectFun(Ref),
+    EffectStored = EffectFun(Tree),
+
+    io:format(user, "Effectiveness goal: <~p new: ~p stored: ~p~n",
+              [50 * ?aggregs, EffectNew, EffectStored]),
+
     [
      ?_assertEqual( yalinka:size(Ref), {ok, length(Data)} ),
      ?_assertEqual( yalinka:dimension(Ref), {ok, Dimension} ),
@@ -172,13 +181,8 @@ looong_test_() ->
                     yalinka:search(Tree, RandomPoint, 1)),
 
      %% effectivenes aggregated per thousand requests
-     ?_assert( 50 * ?aggregs > Effect ),
-     ?_assert( 50 * ?aggregs >
-                   lists:foldl(
-                     fun(_,A) -> {ok, _, N} =
-                                     yalinka:search(Tree, list_to_tuple(Point()), debug),
-                                 A + N
-                     end, 0, lists:seq(1, ?aggregs)))
+     ?_assert( 50 * ?aggregs > EffectNew ),
+     ?_assert( 50 * ?aggregs > EffectStored )
     ].
 
 addition_test_() ->
