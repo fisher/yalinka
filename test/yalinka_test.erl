@@ -4,7 +4,7 @@
 
 -export([start/0, realdata/0]).
 
--compile([export_all]).
+%% -compile([export_all]).
 
 -define(POINTS, [{0,  10.0, 10.0, 10.0},
                  {1,  10.0, 10.0,-10.0},

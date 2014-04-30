@@ -51,12 +51,22 @@ void print_tree(KD_TREE_T *tree)
         printf("got tree of size %"PRIu64", dimension %"PRIu64"\r\n",
                tree->size, tree->dimension);
 
-        for (unsigned int i = 0; i< tree->size; i++) {
-            printf(" \\ [%"PRIu64"] (%g", tree->array.node_3d[i].idx, tree->array.node_3d[i].x[0]);
-            for (unsigned int j = 1; j< tree->dimension; j++) {
-                printf(", %g", tree->array.node_3d[i].x[j]);
+        if (tree->dimension <= MAX_DIM) {
+            for (unsigned int i = 0; i< tree->size; i++) {
+                printf(" \\ [%"PRIu64"] (%g", tree->array.node_3d[i].idx, tree->array.node_3d[i].x[0]);
+                for (unsigned int j = 1; j< tree->dimension; j++) {
+                    printf(", %g", tree->array.node_3d[i].x[j]);
+                }
+                printf(")\r\n");
             }
-            printf(")\r\n");
+        } else {
+            for (unsigned int i = 0; i< tree->size; i++) {
+                printf(" \\ [%"PRIu64"] (%g", tree->array.node_kd[i].idx, tree->array.node_kd[i].x[0]);
+                for (unsigned int j = 1; j< tree->dimension; j++) {
+                    printf(", %g", tree->array.node_kd[i].x[j]);
+                }
+                printf(")\r\n");
+            }
         }
     } else {
         printf("got TOO BIG tree of size %"PRIu64", dimension %"PRIu64". NOT PRINTING.\r\n",
@@ -182,7 +192,7 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
         if ((result = fill_node_tag(env, tuple[0], &array[i].idx)))
             return result;
 
-        if (tree->dimension <= MAX_DIM +1) {
+        if (tree->dimension <= (MAX_DIM +1)) {
 
             for (int j = 1; j<arity; j++) {
                 double inp;
@@ -199,20 +209,28 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
             }
         } else {
 
-            kd_array[i].x = pts;
-            pts += tree->dimension;
+            /* kd_array[i].x = pts; */
+            /* pts += (tree->dimension -1); */
 
+            printf("asdf\r\n");
             for (int j = 1; j<arity; j++) {
-                double inp;
+                double inp2;
 
-                if (!enif_get_double(env, tuple[j], (double*) &inp)) {
+                printf("if, j=%d/%d\r\n", j, arity);
+                if (!enif_get_double(env, tuple[j], (double*) &inp2)) {
+                    if (enif_is_number(env, tuple[j])) {
+                        printf("is_number: true\r\n");
+                    }
+                    printf("eggog \r\n");
                     return error4(env, "invalid_node_spec",
                                   try_make_existing_atom(env, "float"),
                                   enif_make_copy(env, tuple[j]),
                                   enif_make_copy(env, head));
                 }
 
-                kd_array[i].x[j-1] = inp;
+                printf("qwer (i): %d, %d\r\n", i, j);
+                kd_array[i].x[j-1] = inp2;
+                printf("qwer (f): %g\r\n", inp2);
             }
         }
 
@@ -220,6 +238,7 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
         i++;
     }
 
+    printf("zxcv\r\n");
     tree->dimension--;
 
     return 0;
