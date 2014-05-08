@@ -134,6 +134,7 @@ ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
 }
 
 
+
 /*
  * {Idx :: integer(), Coordinate :: float(), ...}
  * size of the tuple in tree->dimension
@@ -189,10 +190,10 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
                             enif_make_int(env, arity),
                             enif_make_copy(env, head) );
 
-        if ((result = fill_node_tag(env, tuple[0], &array[i].idx)))
-            return result;
-
         if (tree->dimension <= (MAX_DIM +1)) {
+
+            if ((result = fill_node_tag(env, tuple[0], &array[i].idx)))
+                return result;
 
             for (int j = 1; j<arity; j++) {
                 double inp;
@@ -208,6 +209,9 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
 
             }
         } else {
+
+            if ((result = fill_node_tag(env, tuple[0], &kd_array[i].idx)))
+                return result;
 
             /* kd_array[i].x = pts; */
             /* pts += (tree->dimension -1); */
