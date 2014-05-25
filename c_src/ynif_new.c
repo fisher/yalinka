@@ -176,6 +176,8 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
 
     tree->dimension++;
 
+    printf("tree-size == %" PRIu64 "\r\n", tree->size);
+
     while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
 
         if (!enif_is_tuple(env, head))
@@ -232,8 +234,14 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
                                   enif_make_copy(env, head));
                 }
 
-                printf("qwer (i): %d, %d\r\n", i, j);
-                kd_array[i].x[j-1] = inp2;
+                printf("qwer (i,j): %d, %d\r\n", i, j);
+                if (i == 1) {
+                    printf ("crash for %02.2g\r\n", inp2);
+                    kd_array[1].x[0] = inp2;
+                    printf ("voila\r\n");
+                } else {
+                    kd_array[i].x[j-1] = inp2;
+                }
                 printf("qwer (f): %g\r\n", inp2);
             }
         }

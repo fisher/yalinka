@@ -35,6 +35,22 @@ first_test_() ->
      ?_assert( true )
     ].
 
+
+
+ok_new_3d_test_() ->
+    [
+     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, 1.1,2.2,3.3},{2, 11.0,22.0,33.0}])),
+     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, [1.1,2.2,3.3]},{2, [11.0,22.0,33.0]}])),
+     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, {1.1,2.2,3.3}},{2, {11.0,22.0,33.0}}]))
+    ].
+
+ok_new_kd_test_() ->
+    [
+     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, 1.1,2.2,3.3,4.4},{2, 11.0,22.0,33.0,44.0}])),
+     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, [1.1,2.2,3.3,4.4]},{2, [11.0,22.0,33.0,44.0]}])),
+     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, {1.1,2.2,3.3,4.4}},{2, {11.0,22.0,33.0,44.0}}]))
+    ].
+
 just_one_7d_test_() ->
     [
      ?_assertMatch(
@@ -54,14 +70,4 @@ long_5d_test_() ->
                      {6, 100.0,200.0,300.0,400.0,500.0},
                      {7, 101.0,202.0,303.0,404.0,505.0}
                     ]))
-    ].
-
-ok_new_test_() ->
-    [
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, 1.1,2.2,3.3},{2, 11.0,22.0,33.0}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, [1.1,2.2,3.3]},{2, [11.0,22.0,33.0]}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, {1.1,2.2,3.3}},{2, {11.0,22.0,33.0}}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, 1.1,2.2,3.3,4.4},{2, 11.0,22.0,33.0,44.0}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, [1.1,2.2,3.3,4.4]},{2, [11.0,22.0,33.0,44.0]}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, {1.1,2.2,3.3,4.4}},{2, {11.0,22.0,33.0,44.0}}]))
     ].
