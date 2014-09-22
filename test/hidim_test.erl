@@ -35,12 +35,30 @@ first_test_() ->
      ?_assert( true )
     ].
 
+direct_load_test_() ->
+    [
+     ?_assertMatch( {module, _M}, code:load_file(yalinka))
+    ].
 
+pure_crash_test_() ->
+    [
+     ?_assertMatch( {ok, _Ref}, yalinka:new(
+                                  [
+                                   {2, 11.1,22.2,33.3,44.4},
+                                   {3, 21.1,32.2,54.3,53.4}
+                                  ])),
+     ?_assertMatch( {ok, _Ref}, yalinka:new(
+                                  [
+                                   {2, 11.1,22.2,33.3,44.4},
+                                   {3, 21.1,32.2,54.3,53.4}
+                                  ]))
+    ].
 
 ok_new_3d_test_() ->
     [
      ?_assertMatch( {ok, _Ref}, yalinka:new([{1, 1.1,2.2,3.3},{2, 11.0,22.0,33.0}])),
      ?_assertMatch( {ok, _Ref}, yalinka:new([{1, [1.1,2.2,3.3]},{2, [11.0,22.0,33.0]}])),
+     ?_assertMatch( {ok, _Ref}, yalinka:new([{2, 3.2,5.2,6.7},{3, 23.1,5.2,56.20}])),
      ?_assertMatch( {ok, _Ref}, yalinka:new([{1, {1.1,2.2,3.3}},{2, {11.0,22.0,33.0}}]))
     ].
 
@@ -52,10 +70,9 @@ ok_new_kd_test_() ->
     ].
 
 just_one_7d_test_() ->
-    [
-     ?_assertMatch(
-        {ok, _Ref},
-        yalinka:new([ {1, 1.0,2.0,3.0,4.0,5.0,6.0,7.0}]))].
+    [ ?_assertMatch(
+         {ok, _Ref},
+         yalinka:new([ {1, 1.1,2.1,3.1,4.1,5.1,6.1,7.1}])) ].
 
 long_5d_test_() ->
     [

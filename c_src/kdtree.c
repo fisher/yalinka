@@ -69,6 +69,20 @@ inline static void swap(node_3d_ptr x, node_3d_ptr y)
     y->idx = idx;
 }
 
+inline static void swap_kd(node_kd_ptr x, node_kd_ptr y)
+{
+    double  *tmpx;
+    uint64_t tmpidx;
+
+    tmpidx = x->idx;
+    x->idx = y->idx;
+    y->idx = tmpidx;
+
+    tmpx = x->x;
+    x->x = y->x;
+    y->x = tmpx;
+}
+
 /* see quickselect method */
 node_3d_ptr find_median(node_3d_ptr start, node_3d_ptr end, int idx)
 {
@@ -106,6 +120,40 @@ node_3d_ptr find_median(node_3d_ptr start, node_3d_ptr end, int idx)
     }
 }
 
+node_kd_ptr find_median_kd(node_kd_ptr start, node_kd_ptr end, int idx)
+{
+    node_kd_ptr p;
+    node_kd_ptr store;
+    node_kd_ptr md;
+
+    double pivot;
+
+    if (end <= start) return NULL;
+    if (end == start +1)
+        return start;
+
+    md = start + (end -start) /2;
+
+    while (1) {
+        pivot = md->x[idx];
+
+        swap_kd(md, end -1);
+        for (store = p = start; p <end; p++) {
+            if (p->x[idx] <pivot) {
+                if (p != store)
+                    swap_kd(p, store);
+                store++;
+            }
+        }
+        swap_kd(store, end -1);
+
+        if (store->x[idx] == md->x[idx])
+            return md;
+
+        if (store > md)  end = store;
+        else           start = store;
+    }
+}
 
 /*
  * array : ptr to the array of nodes
@@ -125,6 +173,20 @@ node_3d_ptr make_tree_3d(node_3d_ptr array, int len, int i, int dim)
         i = (i + 1) % dim;
         n->left  = make_tree_3d(array, n - array, i, dim);
         n->right = make_tree_3d(n + 1, array + len - (n + 1), i, dim);
+    }
+
+    return n;
+}
+
+node_kd_ptr make_tree_kd(node_kd_ptr array, int len, int i, int dim)
+{
+    node_kd_ptr n;
+
+    if (!len) return 0;
+    if ( (n = find_median_kd(array, array +len, i)) ) {
+        i = (i +1) % dim;
+        n->left  = make_tree_kd(array, n -array, i, dim);
+        n->right = make_tree_kd(n +1, array +len -(n +1), i, dim);
     }
 
     return n;

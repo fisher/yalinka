@@ -83,6 +83,7 @@ struct node_kd_t {
 /* extern uni_node make_tree( uni_node t, int len, int i, int dim); */
 
 extern node_3d_ptr make_tree_3d( node_3d_ptr t, int len, int i, int dim);
+extern node_kd_ptr make_tree_kd( node_kd_ptr t, int len, int i, int dim);
 
 extern int nearest( node_3d_ptr root, node_3d_ptr nd, int i, int dim,
                     node_3d_ptr *best, double *best_dist, int counter );

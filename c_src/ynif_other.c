@@ -81,12 +81,23 @@ ERL_NIF_TERM compare_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (tree1->ready != tree2->ready) return try_make_existing_atom(env, "diff");
 
     /* can't use memcmp because of pointers, need to traverse through */
-    for (unsigned int i=0; i<tree1->size; i++) {
-        if ( tree1->array.node_3d[i].idx != tree2->array.node_3d[i].idx )
-            return try_make_existing_atom(env, "diff");
-        for (unsigned int j=0; j<tree1->dimension; j++) {
-            if ( tree1->array.node_3d[i].x[j] != tree2->array.node_3d[i].x[j] )
+    if (tree1->dimension <= MAX_DIM) {
+        for (unsigned int i=0; i<tree1->size; i++) {
+            if ( tree1->array.node_3d[i].idx != tree2->array.node_3d[i].idx )
                 return try_make_existing_atom(env, "diff");
+            for (unsigned int j=0; j<tree1->dimension; j++) {
+                if ( tree1->array.node_3d[i].x[j] != tree2->array.node_3d[i].x[j] )
+                    return try_make_existing_atom(env, "diff");
+            }
+        }
+    } else {
+        for (unsigned int i=0; i<tree1->size; i++) {
+            if (tree1->array.node_kd[i].idx != tree2->array.node_kd[i].idx)
+                return try_make_existing_atom(env, "diff");
+            for (unsigned int j=0; j<tree1->dimension; j++) {
+                if (tree1->array.node_kd[i].x[j] != tree2->array.node_kd[i].x[j] )
+                    return try_make_existing_atom(env, "diff");
+            }
         }
     }
 
@@ -154,19 +165,27 @@ ERL_NIF_TERM root_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     if (tree->size <1) return error1 (env, "empty_tree");
 
-    point = (ERL_NIF_TERM *) enif_alloc(sizeof(ERL_NIF_TERM) * tree->dimension);
+    if (tree->dimension <= MAX_DIM) {
+        point = (ERL_NIF_TERM *) enif_alloc(sizeof(ERL_NIF_TERM) * tree->dimension);
 
-    for (unsigned int i = 0; i<tree->dimension; i++) {
-        point[i] = enif_make_double(env, tree->root.node_3d->x[i]);
+        for (unsigned int i = 0; i<tree->dimension; i++) {
+            point[i] = enif_make_double(env, tree->root.node_3d->x[i]);
+        }
+
+        result = enif_make_tuple3(
+                                  env,
+                                  try_make_existing_atom(env, "ok"),
+                                  enif_make_uint64(env, tree->root.node_3d->idx),
+                                  enif_make_tuple_from_array(env, point, tree->dimension));
+
+        enif_free(point);
+    } else {
+        result = enif_make_tuple3(
+                                  env,
+                                  try_make_existing_atom(env, "ok"),
+                                  enif_make_uint64(env, tree->root.node_kd->idx),
+                                  enif_make_tuple_from_array(env, tree->array.node_kd->x, tree->dimension));
     }
-
-    result = enif_make_tuple3(
-        env,
-        try_make_existing_atom(env, "ok"),
-        enif_make_uint64(env, tree->root.node_3d->idx),
-        enif_make_tuple_from_array(env, point, tree->dimension));
-
-    enif_free(point);
 
     return result;
 }
