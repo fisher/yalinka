@@ -280,12 +280,12 @@ ERL_NIF_TERM gettree_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
                 point[j] = enif_make_double(env,
                                             /* should be: */
                                             /*tree->array[i]->x[j]*/
-                                            tree->array.node_3d[i].x[j]
+                                            tree->array.node_kd[i].x[j]
                                             );
             }
 
             list[i] = enif_make_tuple2(env,
-                                       enif_make_uint64(env, tree->array.node_3d[i].idx),
+                                       enif_make_uint64(env, tree->array.node_kd[i].idx),
                                        enif_make_tuple_from_array(env, point, tree->dimension));
 
         }
