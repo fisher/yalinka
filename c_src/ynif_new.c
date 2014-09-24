@@ -156,7 +156,8 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
 
     node_3d_ptr array;
     node_kd_ptr kd_array;
-    double  *pts;
+    double *pts;
+    double  inp;
 
     ERL_NIF_TERM result;
 
@@ -202,7 +203,6 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
                 return result;
 
             for (int j = 1; j<arity; j++) {
-                double inp;
 
                 if (!enif_get_double(env, tuple[j], (double*) &inp)) {
                     return error4(env, "invalid_node_spec",
@@ -221,36 +221,16 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
 
             pts = enif_alloc(sizeof(double) * tree->dimension);
             kd_array[i].x = pts;
-            /* kd_array[i].x = pts; */
-            /* pts += (tree->dimension -1); */
 
-            printf("asdf\r\n");
             for (int j = 1; j<arity; j++) {
-                double inp2;
 
-                printf("if, j=%d/%d\r\n", j, arity);
-                if (!enif_get_double(env, tuple[j], (double*) &inp2)) {
-                    if (enif_is_number(env, tuple[j])) {
-                        printf("is_number: true\r\n");
-                    }
-                    printf("eggog \r\n");
+                if (!enif_get_double(env, tuple[j], (double*) &inp))
                     return error4(env, "invalid_node_spec",
                                   try_make_existing_atom(env, "float"),
                                   enif_make_copy(env, tuple[j]),
                                   enif_make_copy(env, head));
-                }
 
-                printf("qwer (i,j): %d, %d\r\n", i, j);
-                if (i == 1) {
-                    printf ("crash for %02.2g\r\n", inp2);
-                    kd_array[1].x[0] = inp2;
-                    // писать наужно же в птс, не в кд_аррей же
-                    //pts[1][0] = inp2;
-                    printf ("voila\r\n");
-                } else {
-                    kd_array[i].x[j-1] = inp2;
-                }
-                printf("qwer (f): %g\r\n", inp2);
+                kd_array[i].x[j-1] = inp;
             }
         }
 
