@@ -40,6 +40,8 @@
 
 #define MAX_DIM 3
 
+#define ENIF_FREE(x, y) if (tree->dimension <= MAX_DIM) enif_free(x); else enif_free(y);
+
 typedef struct node_3d_t NODE_3D_T;
 typedef struct node_kd_t NODE_KD_T;
 

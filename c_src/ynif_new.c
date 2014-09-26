@@ -181,8 +181,6 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
 
     tree->dimension++;
 
-    printf("tree-size == %" PRIu64 "\r\n", tree->size);
-
     while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
 
         if (!enif_is_tuple(env, head))
@@ -238,7 +236,6 @@ ERL_NIF_TERM fill_tree_from_plain_tuple( ErlNifEnv *env,
         i++;
     }
 
-    printf("zxcv\r\n");
     tree->dimension--;
 
     return 0;
@@ -484,16 +481,18 @@ ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     while (enif_get_list_cell(env, list_ptr, &head, &tail)) {
 
         if (!enif_get_tuple(env, head, &tuple_arity, &tuple) || tuple_arity != 2) {
-            enif_free(array);
+            ENIF_FREE(array, kd_array);
             return error2(env, "expected_tuple2", enif_make_copy(env, head));
         }
 
         if (tree->dimension <= MAX_DIM) {
+
             if((result = fill_node_tag(env, tuple[0], &array[i].idx))) {
                 enif_free(array);
                 return result;
             }
         } else {
+
             if ((result = fill_node_tag(env, tuple[0], &kd_array[i].idx))) {
                 enif_free(kd_array);
                 return result;
@@ -505,7 +504,7 @@ ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
         if(!enif_get_tuple(env, tuple[1], &dim, &int_tuple)
            || (unsigned int) dim != tree->dimension) {
-            enif_free(array);
+            ENIF_FREE(array, kd_array);
             return error4(env, "invalid_dimension_in_data",
                           enif_make_uint64(env, tree->dimension),
                           enif_make_int(env, dim),
@@ -515,7 +514,7 @@ ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         for (int j = 0; j<dim; j++) {
             double inp;
             if(!enif_get_double(env, int_tuple[j], (double*) &inp)) {
-                enif_free(array);
+                ENIF_FREE(array, kd_array);
                 return error4(env, "invalid_node_spec",
                               try_make_existing_atom(env, "float"),
                               enif_make_copy(env, int_tuple[j]),
