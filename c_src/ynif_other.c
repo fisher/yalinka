@@ -466,9 +466,10 @@ ERL_NIF_TERM store_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
     if (tree->dimension <= MAX_DIM) {
         fwrite(tree->array.node_3d, sizeof(NODE_3D_T), tree->size, file);
     } else {
-        enif_free(filename);
-        fclose(file);
-        return not_implemented(env);
+        fwrite(tree->array.node_kd, sizeof(NODE_KD_T), tree->size, file);
+        for (unsigned int i=0; i<tree->size; i++) {
+            fwrite(tree->array.node_kd[i].x, sizeof(double), tree->dimension, file);
+        }
     }
 
     enif_free(filename);
