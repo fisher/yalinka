@@ -133,6 +133,11 @@ test:	clean eunit proper
 
 longtest: clean eunit oolong
 
+t4d:	clean $(PACKAGE) test/hidim_test.erl
+	ERL_LIBS=$(ERL_LIBS) erlc -o ebin -I include test/hidim_test.erl
+	erl -noinput -pa ebin -eval 'ok = eunit:test(hidim_test, [verbose])' \
+	-s erlang halt
+
 #
 # helpers, algo debug, auxiliary targets
 #

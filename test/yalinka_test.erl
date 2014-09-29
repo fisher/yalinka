@@ -4,7 +4,7 @@
 
 -export([start/0, realdata/0]).
 
--compile([export_all]).
+%% -compile([export_all]).
 
 -define(POINTS, [{0,  10.0, 10.0, 10.0},
                  {1,  10.0, 10.0,-10.0},
@@ -61,17 +61,6 @@ wikipedia_test_() ->
         end)
     ].
 
-storing_test_() ->
-    {ok, Tree} = yalinka:new(?POINTS),
-    [
-     ?_assertEqual( ok, yalinka:store(Tree, "testfile-storing") ),
-     ?_assertEqual( begin
-                        {ok, Ref} = yalinka:load("testfile-storing"),
-                        yalinka:search(Ref, {10.0, 10.0, 11.0}, 1)
-                    end,
-                    yalinka:search(Tree, {10.0, 10.0, 11.0}, 1))
-    ].
-
 search2_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     [
@@ -85,6 +74,17 @@ search2_test_() ->
                     yalinka:search(Tree, {11.0, 11.0, 11.0}, 1)),
      ?_assertEqual( {ok, [{0, math:sqrt(6)}]},
                     yalinka:search(Tree, {11.0, 11.0, 12.0}, 1))
+    ].
+
+storing_test_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    [
+     ?_assertEqual( ok, yalinka:store(Tree, "testfile-storing") ),
+     ?_assertEqual( begin
+                        {ok, Ref} = yalinka:load("testfile-storing"),
+                        yalinka:search(Ref, {10.0, 10.0, 11.0}, 1)
+                    end,
+                    yalinka:search(Tree, {10.0, 10.0, 11.0}, 1))
     ].
 
 compare_test_() ->
@@ -150,10 +150,32 @@ looong_test_() ->
     Data = [
             {I, Point()}
             || I <- lists:seq(1, random:uniform(10000) +?million) ],
+
     {ok, Ref} = yalinka:new(Data),
     ok = yalinka:store(Ref, "testfile-million"),
     {ok, Tree} = yalinka:load("testfile-million"),
+
     RandomPoint = Point(),
+
+    RandomQueryData = [ list_to_tuple(Point()) || _ <- lists:seq(1, ?aggregs) ],
+
+    EffectFun =
+        fun(R) ->
+                lists:foldl(
+                  fun(P,A) ->
+                          {ok, _, N} =
+                              yalinka:search(R, P, debug),
+                          A + N
+                  end,
+                  0, RandomQueryData)
+        end,
+
+    EffectNew = EffectFun(Ref),
+    EffectStored = EffectFun(Tree),
+
+    io:format(user, "Effectiveness goal: <~p new: ~p stored: ~p~n",
+              [50 * ?aggregs, EffectNew, EffectStored]),
+
     [
      ?_assertEqual( yalinka:size(Ref), {ok, length(Data)} ),
      ?_assertEqual( yalinka:dimension(Ref), {ok, Dimension} ),
@@ -163,20 +185,8 @@ looong_test_() ->
                     yalinka:search(Tree, RandomPoint, 1)),
 
      %% effectivenes aggregated per thousand requests
-     ?_assert( 50 * ?aggregs >
-                   lists:foldl(
-                     fun(_,A) ->
-                             {ok, _, N} =
-                                 yalinka:search(Ref, list_to_tuple(Point()), debug),
-                             A + N
-                     end,
-                     0, lists:seq(1, ?aggregs))),
-     ?_assert( 50 * ?aggregs >
-                   lists:foldl(
-                     fun(_,A) -> {ok, _, N} =
-                                     yalinka:search(Tree, list_to_tuple(Point()), debug),
-                                 A + N
-                     end, 0, lists:seq(1, ?aggregs)))
+     ?_assert( 50 * ?aggregs > EffectNew ),
+     ?_assert( 50 * ?aggregs > EffectStored )
     ].
 
 addition_test_() ->
