@@ -618,7 +618,7 @@ ERL_NIF_TERM new_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM *argv)
     printf("indexing...");
 #endif
 
-    if(tree->dimension <4) {
+    if(tree->dimension <= MAX_DIM) {
         tree->root.node_3d =
             make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
     } else {

@@ -1,3 +1,4 @@
+
 %%%-------------------------------------------------------------------
 %%% @author Serge A. Ribalchenko <fisher@heim.in.ua>
 %%% @copyright (C) 2014, Serge A. Ribalchenko
@@ -88,3 +89,4 @@ long_5d_test_() ->
                      {7, 101.0,202.0,303.0,404.0,505.0}
                     ]))
     ].
+

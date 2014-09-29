@@ -61,17 +61,6 @@ wikipedia_test_() ->
         end)
     ].
 
-storing_test_() ->
-    {ok, Tree} = yalinka:new(?POINTS),
-    [
-     ?_assertEqual( ok, yalinka:store(Tree, "testfile-storing") ),
-     ?_assertEqual( begin
-                        {ok, Ref} = yalinka:load("testfile-storing"),
-                        yalinka:search(Ref, {10.0, 10.0, 11.0}, 1)
-                    end,
-                    yalinka:search(Tree, {10.0, 10.0, 11.0}, 1))
-    ].
-
 search2_test_() ->
     {ok, Tree} = yalinka:new(?POINTS),
     [
@@ -85,6 +74,17 @@ search2_test_() ->
                     yalinka:search(Tree, {11.0, 11.0, 11.0}, 1)),
      ?_assertEqual( {ok, [{0, math:sqrt(6)}]},
                     yalinka:search(Tree, {11.0, 11.0, 12.0}, 1))
+    ].
+
+storing_test_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    [
+     ?_assertEqual( ok, yalinka:store(Tree, "testfile-storing") ),
+     ?_assertEqual( begin
+                        {ok, Ref} = yalinka:load("testfile-storing"),
+                        yalinka:search(Ref, {10.0, 10.0, 11.0}, 1)
+                    end,
+                    yalinka:search(Tree, {10.0, 10.0, 11.0}, 1))
     ].
 
 compare_test_() ->

@@ -44,16 +44,6 @@
 #include "kdtree.h"
 
 
-inline static double dist(node_3d_ptr a, node_3d_ptr b, int dim)
-{
-    double t, d = 0;
-    while (dim--) {
-        t = a->x[dim] - b->x[dim];
-        d += t * t;
-    }
-    return d;
-}
-
 /* swap the payload of two nodes */
 inline static void swap(node_3d_ptr x, node_3d_ptr y)
 {
@@ -193,6 +183,26 @@ node_kd_ptr make_tree_kd(node_kd_ptr array, int len, int i, int dim)
 }
 
 
+inline static double dist(node_3d_ptr a, node_3d_ptr b, int dim)
+{
+    double t, d = 0;
+    while (dim--) {
+        t = a->x[dim] - b->x[dim];
+        d += t * t;
+    }
+    return d;
+}
+
+inline static double dist_kd(node_kd_ptr a, node_kd_ptr b, int dim)
+{
+    double t, d = 0;
+    while (dim--) {
+        t = a->x[dim] - b->x[dim];
+        d += t * t;
+    }
+    return d;
+}
+
 /*
  * root      : ptr to the root of the tree
  * point     : point to look for
@@ -230,6 +240,36 @@ int nearest( node_3d_ptr root, node_3d_ptr point, int i, int dim,
   visited = nearest(dx > 0 ? root->left : root->right, point, i, dim, best, best_dist, visited);
   if (dx2 >= *best_dist) return visited;
   visited = nearest(dx > 0 ? root->right : root->left, point, i, dim, best, best_dist, visited);
+
+  return visited;
+}
+
+int nearest_kd( node_kd_ptr root, node_kd_ptr point, int i, int dim,
+                node_kd_ptr *best, double *best_dist, int counter ) {
+
+  double d, dx, dx2;
+  int visited = counter;
+
+  if (!root) return visited;
+  d = dist_kd(root, point, dim);
+  dx = root->x[i] - point->x[i];
+  dx2 = dx * dx;
+
+  visited ++;
+
+  if (!*best || d < *best_dist) {
+    *best_dist = d;
+    *best = root;
+  }
+
+  /* if chance of exact match is high */
+  if (!*best_dist) return visited;
+
+  if (++i >= dim) i = 0;
+
+  visited = nearest_kd(dx > 0 ? root->left : root->right, point, i, dim, best, best_dist, visited);
+  if (dx2 >= *best_dist) return visited;
+  visited = nearest_kd(dx > 0 ? root->right : root->left, point, i, dim, best, best_dist, visited);
 
   return visited;
 }

@@ -38,7 +38,7 @@
 
 #include <inttypes.h>
 
-#define MAX_DIM 3
+#define MAX_DIM 2
 
 #define ENIF_FREE(x, y) if (tree->dimension <= MAX_DIM) enif_free(x); else enif_free(y);
 
@@ -89,6 +89,9 @@ extern node_kd_ptr make_tree_kd( node_kd_ptr t, int len, int i, int dim);
 
 extern int nearest( node_3d_ptr root, node_3d_ptr nd, int i, int dim,
                     node_3d_ptr *best, double *best_dist, int counter );
+
+extern int nearest_kd( node_kd_ptr root, node_kd_ptr nd, int i, int dim,
+                       node_kd_ptr *best, double *best_dist, int counter );
 
 #endif
 

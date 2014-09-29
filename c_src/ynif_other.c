@@ -210,22 +210,25 @@ ERL_NIF_TERM node_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     if (!enif_get_uint64(env, argv[1], &idx)) return enif_make_badarg(env);
 
-    printf("size: %"PRIu64", idx: %"PRIu64"\r\n", tree->size, idx);
-    if (! (tree->size > idx)) return error2 (env, "index_out_of_range", idx);
+    if (! (tree->size > idx))
+        return error2 (env, "index_out_of_range", enif_make_uint64(env, idx));
 
     point = (ERL_NIF_TERM *) enif_alloc(sizeof(ERL_NIF_TERM) * tree->dimension);
 
+    if ( NULL == point ) return error1 (env, "memory_allocation_error");
+
     if (tree->dimension <= MAX_DIM) {
 
-    for (unsigned int i = 0; i<tree->dimension; i++) {
+        for (unsigned int i = 0; i<tree->dimension; i++) {
 
 #ifdef DEBUG
-        printf("double [%d] = %g\r\n", i, tree->array.node_3d[idx].x[i]);
+            printf("double [%ud] = %g\r\n", i, tree->array.node_3d[idx].x[i]);
 #endif
-        point[i] = enif_make_double(env, tree->array.node_3d[idx].x[i]);
-    }
+            point[i] = enif_make_double(env, tree->array.node_3d[idx].x[i]);
 
-    idx = tree->array.node_3d[idx].idx;
+        }
+
+        idx = tree->array.node_3d[idx].idx;
 
     } else {
         for (unsigned int i=0; i<tree->dimension; i++)
