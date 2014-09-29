@@ -42,7 +42,7 @@
 #include "kdtree.h"
 
 
-#define FMARK "yalinka1"
+#define FMARK "yalinka2"
 
 ERL_NIF_TERM size_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
