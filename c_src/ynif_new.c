@@ -471,7 +471,7 @@ ERL_NIF_TERM add_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         memcpy(array, tree->array.node_3d, sizeof(NODE_3D_T) * tree->size);
     } else {
         kd_array = enif_alloc(sizeof(NODE_KD_T) * (tree->size + list_size));
-        memcpy(array, tree->array.node_kd, sizeof(NODE_KD_T) * tree->size);
+        memcpy(kd_array, tree->array.node_kd, sizeof(NODE_KD_T) * tree->size);
     }
 
 
