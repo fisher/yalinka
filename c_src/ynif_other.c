@@ -530,8 +530,12 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
         tree->array.node_3d = enif_alloc(sizeof(NODE_3D_T) * tree->size);
         got = fread(tree->array.node_3d, sizeof(NODE_3D_T), tree->size, file);
     } else {
-        fclose(file);
-        return not_implemented(env);
+        tree->array.node_kd = enif_alloc(sizeof(NODE_KD_T) * tree->size);
+        got = fread(tree->array.node_kd, sizeof(NODE_KD_T), tree->size, file);
+        for (unsigned int i=0; i<tree->size; i++) {
+            tree->array.node_kd[i].x = enif_alloc(sizeof(double) *tree->dimension);
+            fread(tree->array.node_kd[i].x, sizeof(double), tree->dimension, file);
+        }
     }
 
 
@@ -547,16 +551,20 @@ ERL_NIF_TERM load_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
                       enif_make_int(env, got));
 
 #ifdef DEBUG
-
     printf("indexing...");
     fflush(stdout);
-    tree->root.node_3d =
-        make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
-    printf("done.\r\n");
+#endif
 
-#else
-    tree->root.node_3d =
-        make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
+    if (tree->dimension <= MAX_DIM) {
+        tree->root.node_3d =
+            make_tree_3d( tree->array.node_3d, tree->size, 0, tree->dimension);
+    } else {
+        tree->root.node_kd =
+            make_tree_kd( tree->array.node_kd, tree->size, 0, tree->dimension);
+    }
+
+#ifdef DEBUG
+    printf("done.\r\n");
 #endif
 
     tree->ready = 1;
