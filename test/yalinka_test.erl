@@ -27,28 +27,41 @@
 start() ->
     not_implemented_yet.
 
-size_test_() ->
-    {ok, Tree} = yalinka:new(?POINTS),
-    Size = yalinka:size(Tree),
-    {ok, Tre1} = yalinka:new([{I, {X,Y,Z}}||{I, X,Y,Z}<-?POINTS]),
-    Siz1 = yalinka:size(Tre1),
-    {ok, Tre2} = yalinka:new([{I, [X,Y,Z]}||{I, X,Y,Z}<-?POINTS]),
-    Siz2 = yalinka:size(Tre2),
+new_test_() ->
     [
-     ?_assertEqual(Size, {ok, length(?POINTS)}),
-     ?_assertEqual(Siz1, {ok, length(?POINTS)}),
-     ?_assertEqual(Siz2, {ok, length(?POINTS)})
+     ?_assertMatch( {ok, _Tree}, yalinka:new(?POINTS) ),
+     ?_assertMatch( {ok, _Tre1}, yalinka:new([{I, {X,Y,Z}}||{I, X,Y,Z}<-?POINTS])),
+     ?_assertMatch( {ok, _Tre2}, yalinka:new([{I, [X,Y,Z]}||{I, X,Y,Z}<-?POINTS]))
     ].
 
+size_test_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    {ok, Tre1} = yalinka:new([{I, {X,Y,Z}}||{I, X,Y,Z}<-?POINTS]),
+    {ok, Tre2} = yalinka:new([{I, [X,Y,Z]}||{I, X,Y,Z}<-?POINTS]),
+    [
+     ?_assertEqual( {ok, length(?POINTS)}, yalinka:size(Tree) ),
+     ?_assertEqual( {ok, length(?POINTS)}, yalinka:size(Tre1) ),
+     ?_assertEqual( {ok, length(?POINTS)}, yalinka:size(Tre2) )
+    ].
 
 root_test_() ->
-    {ok, Ref} = yalinka:new(?ROOT),
+    {ok, Refrn} = yalinka:new(?ROOT),
     {ok, Type2} = yalinka:new([{I, {X,Y,Z}}||{I,X,Y,Z}<-?ROOT]),
     {ok, Type3} = yalinka:new([{I, [X,Y,Z]}||{I,X,Y,Z}<-?ROOT]),
+    {ok, Tree1} = yalinka:new(?POINTS),
+    {ok, Tree2} = yalinka:new(?WIKIPEDIA_TEST),
     [
-     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Ref)   ),
-     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Type2) ),
-     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Type3) )
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}},       yalinka:root(Refrn) ),
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}},       yalinka:root(Type2) ),
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}},       yalinka:root(Type3) ),
+     ?_assertEqual( {ok,7, {-10.0,-10.0,-10.0}}, yalinka:root(Tree1) ),
+     ?_assertEqual( {ok,6, {7.0,2.0}},           yalinka:root(Tree2) )
+    ].
+
+search_test_() ->
+    {ok, Ref} = yalinka:new(?ROOT),
+    [
+     ?_assertMatch( {ok, [{12, _Dist}]}, yalinka:search(Ref, {-11.2,-3.4,-5.6}) )
     ].
 
 wikipedia_test_() ->
@@ -144,6 +157,7 @@ invalid_ref_test_() ->
 looong_test_() ->
     random:seed(erlang:now()),
     Dimension = 1+ random:uniform(2), %% dimension 2..3
+    %%Dimension =3,
     Point = fun() ->
                     [random:uniform() || _ <- lists:seq(1,Dimension)]
             end,

@@ -38,7 +38,7 @@
 
 #include <inttypes.h>
 
-#define MAX_DIM 3
+#define MAX_DIM 2
 
 #define ENIF_FREE(x, y) if (tree->dimension <= MAX_DIM) enif_free(x); else enif_free(y);
 

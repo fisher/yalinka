@@ -1,6 +1,6 @@
 
 * Things that I believe should be done before 1.0 release
-** TODO [#A] true k-d with special workarounds for 2d and 3d          :0.7.0:
+** DONE [#A] true k-d with special workarounds for 2d and 3d          :0.7.0:
 ** index/1 should return spent time or traversed branches             :0.6.0:
    - Note taken on [2014-04-29 Tue 15:22] \\
      not needed I believe. After some investigation I came to
@@ -15,7 +15,7 @@
      sensitive enough in means of consumed time.
    - Note taken on [2014-02-05 Wed 14:38] \\
      not sure if it needed or not
-** TODO search/3 should return more than 1 point found
+** TODO search/3 should be able to return more than 1 nearest point
 ** TODO add/2 should reallocate memory and not to copy old data
 ** TODO insert/2 should be more outsmart to really insert, not just add and reindex
 ** TODO remove/2 should remove specified nodes by ids from given tree
