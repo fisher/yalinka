@@ -154,7 +154,6 @@ ERL_NIF_TERM error3(ErlNifEnv *env, char *explanation, ERL_NIF_TERM term, ERL_NI
  *                                {got, Got},
  *                                {term, Causing_term}]}}
  */
-
 ERL_NIF_TERM error4 ( ErlNifEnv *env,
                       char *explanation,
                       ERL_NIF_TERM expected,

@@ -43,18 +43,9 @@
 #define KDTREE_C
 #include "kdtree.h"
 
-inline static double dist(node_ptr a, node_ptr b, int dim)
-{
-    double t, d = 0;
-    while (dim--) {
-        t = a->x[dim] - b->x[dim];
-        d += t * t;
-    }
-    return d;
-}
 
 /* swap the payload of two nodes */
-inline static void swap(node_ptr x, node_ptr y)
+inline static void swap(node_3d_ptr x, node_3d_ptr y)
 {
     double tmp[MAX_DIM];
     uint64_t idx;
@@ -68,12 +59,26 @@ inline static void swap(node_ptr x, node_ptr y)
     y->idx = idx;
 }
 
-/* see quickselect method */
-node_ptr find_median(node_ptr start, node_ptr end, int idx)
+inline static void swap_kd(node_kd_ptr x, node_kd_ptr y)
 {
-    node_ptr p;
-    node_ptr store;
-    node_ptr md;
+    double  *tmpx;
+    uint64_t tmpidx;
+
+    tmpidx = x->idx;
+    x->idx = y->idx;
+    y->idx = tmpidx;
+
+    tmpx = x->x;
+    x->x = y->x;
+    y->x = tmpx;
+}
+
+/* see quickselect method */
+node_3d_ptr find_median(node_3d_ptr start, node_3d_ptr end, int idx)
+{
+    node_3d_ptr p;
+    node_3d_ptr store;
+    node_3d_ptr md;
 
     double pivot;
 
@@ -105,6 +110,40 @@ node_ptr find_median(node_ptr start, node_ptr end, int idx)
     }
 }
 
+node_kd_ptr find_median_kd(node_kd_ptr start, node_kd_ptr end, int idx)
+{
+    node_kd_ptr p;
+    node_kd_ptr store;
+    node_kd_ptr md;
+
+    double pivot;
+
+    if (end <= start) return NULL;
+    if (end == start +1)
+        return start;
+
+    md = start + (end -start) /2;
+
+    while (1) {
+        pivot = md->x[idx];
+
+        swap_kd(md, end -1);
+        for (store = p = start; p <end; p++) {
+            if (p->x[idx] <pivot) {
+                if (p != store)
+                    swap_kd(p, store);
+                store++;
+            }
+        }
+        swap_kd(store, end -1);
+
+        if (store->x[idx] == md->x[idx])
+            return md;
+
+        if (store > md)  end = store;
+        else           start = store;
+    }
+}
 
 /*
  * array : ptr to the array of nodes
@@ -114,20 +153,55 @@ node_ptr find_median(node_ptr start, node_ptr end, int idx)
  *
  * returns pointer to the root of given tree
  */
-node_ptr make_tree(node_ptr array, int len, int i, int dim)
+node_3d_ptr make_tree_3d(node_3d_ptr array, int len, int i, int dim)
 {
-    node_ptr n;
+    node_3d_ptr n;
 
     if (!len) return 0;
 
     if ( (n = find_median(array, array + len, i)) ) {
         i = (i + 1) % dim;
-        n->left  = make_tree(array, n - array, i, dim);
-        n->right = make_tree(n + 1, array + len - (n + 1), i, dim);
+        n->left  = make_tree_3d(array, n - array, i, dim);
+        n->right = make_tree_3d(n + 1, array + len - (n + 1), i, dim);
     }
+
     return n;
 }
 
+node_kd_ptr make_tree_kd(node_kd_ptr array, int len, int i, int dim)
+{
+    node_kd_ptr n;
+
+    if (!len) return 0;
+    if ( (n = find_median_kd(array, array +len, i)) ) {
+        i = (i +1) % dim;
+        n->left  = make_tree_kd(array, n -array, i, dim);
+        n->right = make_tree_kd(n +1, array +len -(n +1), i, dim);
+    }
+
+    return n;
+}
+
+
+inline static double dist(node_3d_ptr a, node_3d_ptr b, int dim)
+{
+    double t, d = 0;
+    while (dim--) {
+        t = a->x[dim] - b->x[dim];
+        d += t * t;
+    }
+    return d;
+}
+
+inline static double dist_kd(node_kd_ptr a, node_kd_ptr b, int dim)
+{
+    double t, d = 0;
+    while (dim--) {
+        t = a->x[dim] - b->x[dim];
+        d += t * t;
+    }
+    return d;
+}
 
 /*
  * root      : ptr to the root of the tree
@@ -140,8 +214,8 @@ node_ptr make_tree(node_ptr array, int len, int i, int dim)
  *
  * returns the number of visited nodes
  */
-int nearest( node_ptr root, node_ptr point, int i, int dim,
-             KD_NODE_T **best, double *best_dist, int counter ) {
+int nearest( node_3d_ptr root, node_3d_ptr point, int i, int dim,
+             node_3d_ptr *best, double *best_dist, int counter ) {
 
   double d, dx, dx2;
   int visited = counter;
@@ -166,6 +240,36 @@ int nearest( node_ptr root, node_ptr point, int i, int dim,
   visited = nearest(dx > 0 ? root->left : root->right, point, i, dim, best, best_dist, visited);
   if (dx2 >= *best_dist) return visited;
   visited = nearest(dx > 0 ? root->right : root->left, point, i, dim, best, best_dist, visited);
+
+  return visited;
+}
+
+int nearest_kd( node_kd_ptr root, node_kd_ptr point, int i, int dim,
+                node_kd_ptr *best, double *best_dist, int counter ) {
+
+  double d, dx, dx2;
+  int visited = counter;
+
+  if (!root) return visited;
+  d = dist_kd(root, point, dim);
+  dx = root->x[i] - point->x[i];
+  dx2 = dx * dx;
+
+  visited ++;
+
+  if (!*best || d < *best_dist) {
+    *best_dist = d;
+    *best = root;
+  }
+
+  /* if chance of exact match is high */
+  if (!*best_dist) return visited;
+
+  if (++i >= dim) i = 0;
+
+  visited = nearest_kd(dx > 0 ? root->left : root->right, point, i, dim, best, best_dist, visited);
+  if (dx2 >= *best_dist) return visited;
+  visited = nearest_kd(dx > 0 ? root->right : root->left, point, i, dim, best, best_dist, visited);
 
   return visited;
 }

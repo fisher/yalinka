@@ -82,15 +82,18 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env,
     KD_TREE_T *tree;
 
     /* point taken from the args */
-    KD_NODE_T point;
+    NODE_3D_T point;
+    NODE_KD_T point_kd;
 
     /* temp placeholder for tuple and its arity */
     const ERL_NIF_TERM *tuple;
     int tuple_arity;
 
-    node_ptr found;
+    node_3d_ptr found;
+    node_kd_ptr found_kd;
     double best_dist;
     int seen;
+    uint64_t idx;
 
     /* placeholder for the list of what we're found */
     ERL_NIF_TERM *list;
@@ -115,9 +118,22 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env,
     if (tree->size < 1)
         return error1( env, "empty_tree" );
 
-    for (int i=0; i<tuple_arity; i++) {
-        if (!enif_get_double(env, tuple[i], &point.x[i]))
-            return enif_make_badarg(env);
+    if (tree->dimension <= MAX_DIM) {
+
+        for (int i=0; i<tuple_arity; i++) {
+            if (!enif_get_double(env, tuple[i], &point.x[i]))
+                return enif_make_badarg(env);
+        }
+    } else {
+        point_kd.x = enif_alloc(sizeof(double) *tree->dimension);
+
+        for (int i=0; i<tuple_arity; i++) {
+            if (!enif_get_double(env, tuple[i], &point_kd.x[i])) {
+                enif_free(point_kd.x);
+                return enif_make_badarg(env);
+
+            }
+        }
     }
 
     list = (ERL_NIF_TERM *) enif_alloc( sizeof(ERL_NIF_TERM) * howmuch );
@@ -125,26 +141,36 @@ ERL_NIF_TERM search_nearest(ErlNifEnv *env,
      /* meat here */
 
     found = 0;
+    found_kd = 0;
 
+
+    if (tree->dimension <= MAX_DIM) {
 #ifdef DEBUG
-    printf("searching for (%g, %g, %g)\r\n",
-           point.x[0], point.x[1], point.x[2]);
+        printf("searching for (%g, %g, %g)\r\n",
+               point.x[0], point.x[1], point.x[2]);
 
-    seen =
-        nearest(tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
+        seen =
+            nearest(tree->root.node_3d, &point, 0, tree->dimension, &found, &best_dist, 0);
 
-    printf("search done.\r\nfor (%g, %g, %g) we've "
-           "found (%g, %g, %g)\r\nidx %lu dist %g\r\nseen %d nodes\r\n\n",
-           point.x[0], point.x[1], point.x[2],
-           found->x[0], found->x[1], found->x[2], found->idx,
-           sqrt(best_dist), seen);
+        printf("search done.\r\nfor (%g, %g, %g) we've "
+               "found (%g, %g, %g)\r\nidx %lu dist %g\r\nseen %d nodes\r\n\n",
+               point.x[0], point.x[1], point.x[2],
+               found->x[0], found->x[1], found->x[2], found->idx,
+               sqrt(best_dist), seen);
 #else
-    seen = nearest ( tree->root, &point, 0, tree->dimension, &found, &best_dist, 0);
+        seen = nearest ( tree->root.node_3d, &point, 0, tree->dimension, &found, &best_dist, 0);
 #endif
+        idx = found->idx;
 
+    } else {
+
+        seen = nearest_kd(tree->root.node_kd, &point_kd, 0,
+                          tree->dimension, &found_kd, &best_dist, 0);
+        idx = found_kd->idx;
+    }
 
     list[0] = enif_make_tuple2( env,
-                                enif_make_uint64(env, found->idx),
+                                enif_make_uint64(env, idx),
                                 enif_make_double(env, sqrt(best_dist)));
 
     if (debug) {

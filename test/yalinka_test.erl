@@ -4,7 +4,7 @@
 
 -export([start/0, realdata/0]).
 
--compile([export_all]).
+%% -compile([export_all]).
 
 -define(POINTS, [{0,  10.0, 10.0, 10.0},
                  {1,  10.0, 10.0,-10.0},
@@ -15,6 +15,15 @@
                  {6, -10.0,-10.0, 10.0},
                  {7, -10.0,-10.0,-10.0}]).
 
+
+-define(POINTS_5D, [{1, 1.1,1.2,1.3,1.4,1.5},
+                    {2, 2.1,2.2,2.3,2.4,2.5},
+                    {3, 3.1,3.2,3.3,3.4,3.5},
+                    {4, 4.1,4.2,4.3,4.4,4.5},
+                    {5, 5.1,5.2,5.3,5.4,5.5},
+                    {6, 6.1,6.2,6.3,6.4,6.5},
+                    {7, 7.1,7.2,7.3,7.4,7.5},
+                    {8, 8.1,8.2,8.3,8.4,8.5}]).
 
 -define(ROOT, [{11, 10.0,10.0,10.0}, {12, -10.0,-10.0,-10.0}, {13, 1.0,1.0,1.0}]).
 
@@ -27,28 +36,56 @@
 start() ->
     not_implemented_yet.
 
-size_test_() ->
-    {ok, Tree} = yalinka:new(?POINTS),
-    Size = yalinka:size(Tree),
-    {ok, Tre1} = yalinka:new([{I, {X,Y,Z}}||{I, X,Y,Z}<-?POINTS]),
-    Siz1 = yalinka:size(Tre1),
-    {ok, Tre2} = yalinka:new([{I, [X,Y,Z]}||{I, X,Y,Z}<-?POINTS]),
-    Siz2 = yalinka:size(Tre2),
+new_test_() ->
     [
-     ?_assertEqual(Size, {ok, length(?POINTS)}),
-     ?_assertEqual(Siz1, {ok, length(?POINTS)}),
-     ?_assertEqual(Siz2, {ok, length(?POINTS)})
+     ?_assertMatch( {ok, _Tree}, yalinka:new(?POINTS) ),
+     ?_assertMatch( {ok, _Tre1}, yalinka:new([{I, {X,Y,Z}}||{I, X,Y,Z}<-?POINTS])),
+     ?_assertMatch( {ok, _Tre2}, yalinka:new([{I, [X,Y,Z]}||{I, X,Y,Z}<-?POINTS]))
     ].
 
+new_kd_test_() ->
+    [
+     ?_assertMatch( {ok, _Tree}, yalinka:new(?POINTS_5D)),
+     ?_assertMatch( {ok, _Tree},
+                    yalinka:new([{I, {A,B,C,D,E}}||{I,A,B,C,D,E}<-?POINTS_5D])),
+     ?_assertMatch( {ok, _Tree},
+                    yalinka:new([{I, [A,B,C,D,E]}||{I,A,B,C,D,E}<-?POINTS_5D]))
+    ].
+
+size_test_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    {ok, Tre1} = yalinka:new([{I, {X,Y,Z}}||{I, X,Y,Z}<-?POINTS]),
+    {ok, Tre2} = yalinka:new([{I, [X,Y,Z]}||{I, X,Y,Z}<-?POINTS]),
+    [
+     ?_assertEqual( {ok, length(?POINTS)}, yalinka:size(Tree) ),
+     ?_assertEqual( {ok, length(?POINTS)}, yalinka:size(Tre1) ),
+     ?_assertEqual( {ok, length(?POINTS)}, yalinka:size(Tre2) )
+    ].
 
 root_test_() ->
-    {ok, Ref} = yalinka:new(?ROOT),
+    {ok, Refrn} = yalinka:new(?ROOT),
     {ok, Type2} = yalinka:new([{I, {X,Y,Z}}||{I,X,Y,Z}<-?ROOT]),
     {ok, Type3} = yalinka:new([{I, [X,Y,Z]}||{I,X,Y,Z}<-?ROOT]),
+    {ok, Tree1} = yalinka:new(?POINTS),
+    {ok, Tree2} = yalinka:new(?WIKIPEDIA_TEST),
+    {ok, Tr5d1} = yalinka:new(?POINTS_5D),
+    {ok, Tr5d2} = yalinka:new([{I, {A,B,C,D,E}}||{I,A,B,C,D,E}<-?POINTS_5D]),
+    {ok, Tr5d3} = yalinka:new([{I, [A,B,C,D,E]}||{I,A,B,C,D,E}<-?POINTS_5D]),
     [
-     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Ref)   ),
-     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Type2) ),
-     ?_assertEqual( {ok,13,{1.0,1.0,1.0}}, yalinka:root(Type3) )
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}},       yalinka:root(Refrn) ),
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}},       yalinka:root(Type2) ),
+     ?_assertEqual( {ok,13,{1.0,1.0,1.0}},       yalinka:root(Type3) ),
+     ?_assertEqual( {ok,7, {-10.0,-10.0,-10.0}}, yalinka:root(Tree1) ),
+     ?_assertEqual( {ok,6, {7.0,2.0}},           yalinka:root(Tree2) ),
+     ?_assertEqual( {ok,5,{5.1,5.2,5.3,5.4,5.5}},yalinka:root(Tr5d1) ),
+     ?_assertEqual( {ok,5,{5.1,5.2,5.3,5.4,5.5}},yalinka:root(Tr5d2) ),
+     ?_assertEqual( {ok,5,{5.1,5.2,5.3,5.4,5.5}},yalinka:root(Tr5d3) )
+    ].
+
+search_test_() ->
+    {ok, Ref} = yalinka:new(?ROOT),
+    [
+     ?_assertMatch( {ok, [{12, _Dist}]}, yalinka:search(Ref, {-11.2,-3.4,-5.6}) )
     ].
 
 wikipedia_test_() ->
@@ -59,17 +96,6 @@ wikipedia_test_() ->
             {ok, [{5, Dist}]} = yalinka:search(Ref, {9.0, 2.0}, 1),
             Dist < 1.4143 andalso Dist > 1.4141
         end)
-    ].
-
-storing_test_() ->
-    {ok, Tree} = yalinka:new(?POINTS),
-    [
-     ?_assertEqual( ok, yalinka:store(Tree, "testfile-storing") ),
-     ?_assertEqual( begin
-                        {ok, Ref} = yalinka:load("testfile-storing"),
-                        yalinka:search(Ref, {10.0, 10.0, 11.0}, 1)
-                    end,
-                    yalinka:search(Tree, {10.0, 10.0, 11.0}, 1))
     ].
 
 search2_test_() ->
@@ -87,16 +113,108 @@ search2_test_() ->
                     yalinka:search(Tree, {11.0, 11.0, 12.0}, 1))
     ].
 
-compare_test_() ->
-    {ok, Tree1} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0},{4,4.0,4.0,4.0}]),
-    {ok, Tree2} = yalinka:new([{1,[1.0,1.0,1.0]},{2,[2.0,2.0,2.0]},{3,[3.0,3.0,3.0]},{4,[4.0,4.0,4.0]}]),
-    {ok, Tree3} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0}]),
-    {ok, Tree4} = yalinka:new([{1,1.0,1.0,1.0},{2,2.0,2.0,2.0},{3,3.0,3.0,3.0},{4,4.1,4.0,4.0}]),
+search_5d_test_() ->
+    {ok, Tree} = yalinka:new(?POINTS_5D),
     [
-     ?_assertEqual( equal, yalinka:compare(Tree1,Tree2)),
-     ?_assertEqual( diff,  yalinka:compare(Tree2,Tree3)),
-     ?_assertEqual( diff,  yalinka:compare(Tree1,Tree4)),
-     ?_assertEqual( equal, yalinka:compare(Tree2,Tree1))
+     ?_assertEqual( {ok, [{1, 0.0}]},
+                    yalinka:search(Tree, {1.1,1.2,1.3,1.4,1.5})),
+     ?_assertEqual( {ok, [{3, 1.0}]},
+                    yalinka:search(Tree, {3.1,3.2,4.3,3.4,3.5})),
+     ?_assertEqual( {ok, [{3, math:sqrt(2)}]},
+                    yalinka:search(Tree, {3.1,4.2,3.3,3.4,4.5}))
+    ].
+
+storing_test_() ->
+    {ok, Tree} = yalinka:new(?POINTS),
+    [
+     ?_assertEqual( ok, yalinka:store(Tree, "testfile-storing") ),
+     ?_assertEqual( begin
+                        {ok, Ref} = yalinka:load("testfile-storing"),
+                        yalinka:search(Ref, {10.0, 10.0, 11.0}, 1)
+                    end,
+                    yalinka:search(Tree, {10.0, 10.0, 11.0}, 1))
+    ].
+
+compare_test_() ->
+    {ok, Tree1} = yalinka:new([ {1, 1.0,1.0,1.0},  {2, 2.0,2.0,2.0},
+                                {3, 3.0,3.0,3.0},  {4, 4.0,4.0,4.0} ]),
+    {ok, Tree2} = yalinka:new([ {1,[1.0,1.0,1.0]}, {2,[2.0,2.0,2.0]},
+                                {3,[3.0,3.0,3.0]}, {4,[4.0,4.0,4.0]}] ),
+    {ok, Tree3} = yalinka:new([ {1, 1.0,1.0,1.0},  {2, 2.0,2.0,2.0},
+                                {3, 3.0,3.0,3.0} ]),
+    {ok, Tree4} = yalinka:new([ {1, 1.0,1.0,1.0},  {2, 2.0,2.0,2.0},
+                                {3, 3.0,3.0,3.0},  {4, 4.1,4.0,4.0} ]),
+    {ok, Tree5} = yalinka:new([ {3,{3.0,3.0,3.0}}, {4,{4.0,4.0,4.0}},
+                                {1,{1.0,1.0,1.0}}, {2,{2.0,2.0,2.0}} ]),
+    [
+     ?_assertEqual( equal, yalinka:compare(Tree1, Tree2)),
+     ?_assertEqual( equal, yalinka:compare(Tree2, Tree1)),
+     ?_assertEqual( diff,  yalinka:compare(Tree2, Tree3)),
+     ?_assertEqual( diff,  yalinka:compare(Tree1, Tree4)),
+     ?_assertEqual( equal, yalinka:compare(Tree2, Tree1)),
+     ?_assertEqual( equal, yalinka:compare(Tree1, Tree5)),
+     ?_assertEqual( equal, yalinka:compare(Tree2, Tree5)),
+     ?_assertEqual( equal, yalinka:compare(Tree5, Tree2)),
+     ?_assertEqual( equal, yalinka:compare(Tree5, Tree1)),
+     ?_assertEqual( diff,  yalinka:compare(Tree5, Tree3)),
+     ?_assertEqual( diff,  yalinka:compare(Tree5, Tree4))
+    ].
+
+compare_kd_test_() ->
+    {ok, Tree1} = yalinka:new([ {1, 1.0,1.0,1.0,1.0},  {2, 2.0,2.0,2.0,2.0},
+                                {3, 3.0,3.0,3.0,3.0},  {4, 4.0,4.0,4.0,4.0} ]),
+    {ok, Tree2} = yalinka:new([ {1,{1.0,1.0,1.0,1.0}}, {2,{2.0,2.0,2.0,2.0}},
+                                {3,{3.0,3.0,3.0,3.0}}, {4,{4.0,4.0,4.0,4.0}} ]),
+    {ok, Tree3} = yalinka:new([ {3,[3.0,3.0,3.0,3.0]}, {4,[4.0,4.0,4.0,4.0]},
+                                {1,[1.0,1.0,1.0,1.0]}, {2,[2.0,2.0,2.0,2.0]} ]),
+    {ok, Tree4} = yalinka:new([ {1, 1.0,1.0,1.1,1.0},  {2, 2.0,2.0,2.0,2.0},
+                                {3, 3.0,3.0,3.0,3.0},  {4, 4.0,4.0,4.0,4.0} ]),
+    {ok, Tree5} = yalinka:new([ {1, 1.0,1.0,1.0,1.0},  {2, 2.0,2.0,2.0,2.0},
+                                {3, 3.0,3.0,3.0,3.0} ]),
+    {ok, Tree6} = yalinka:new([ {1, 1.0,1.0,1.0},      {2, 2.0,2.0,2.0},
+                                {3, 3.0,3.0,3.0},      {4, 4.0,4.0,4.0} ]),
+    [
+     ?_assertEqual( equal, yalinka:compare( Tree1, Tree1 )),
+     ?_assertEqual( equal, yalinka:compare( Tree1, Tree2 )),
+     ?_assertEqual( equal, yalinka:compare( Tree1, Tree3 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree1, Tree4 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree1, Tree5 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree1, Tree6 )),
+
+     ?_assertEqual( equal, yalinka:compare( Tree2, Tree1 )),
+     ?_assertEqual( equal, yalinka:compare( Tree2, Tree2 )),
+     ?_assertEqual( equal, yalinka:compare( Tree2, Tree3 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree2, Tree4 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree2, Tree5 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree2, Tree6 )),
+
+     ?_assertEqual( equal, yalinka:compare( Tree3, Tree1 )),
+     ?_assertEqual( equal, yalinka:compare( Tree3, Tree2 )),
+     ?_assertEqual( equal, yalinka:compare( Tree3, Tree3 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree3, Tree4 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree3, Tree5 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree3, Tree6 )),
+
+     ?_assertEqual( diff,  yalinka:compare( Tree4, Tree1 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree4, Tree2 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree4, Tree3 )),
+     ?_assertEqual( equal, yalinka:compare( Tree4, Tree4 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree4, Tree5 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree4, Tree6 )),
+
+     ?_assertEqual( diff,  yalinka:compare( Tree5, Tree1 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree5, Tree2 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree5, Tree3 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree5, Tree4 )),
+     ?_assertEqual( equal, yalinka:compare( Tree5, Tree5 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree5, Tree6 )),
+
+     ?_assertEqual( diff,  yalinka:compare( Tree6, Tree1 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree6, Tree2 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree6, Tree3 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree6, Tree4 )),
+     ?_assertEqual( diff,  yalinka:compare( Tree6, Tree5 )),
+     ?_assertEqual( equal, yalinka:compare( Tree6, Tree6 ))
     ].
 
 gettree_test_() ->
@@ -144,16 +262,39 @@ invalid_ref_test_() ->
 looong_test_() ->
     random:seed(erlang:now()),
     Dimension = 1+ random:uniform(2), %% dimension 2..3
+    %%Dimension =3,
     Point = fun() ->
                     [random:uniform() || _ <- lists:seq(1,Dimension)]
             end,
     Data = [
             {I, Point()}
             || I <- lists:seq(1, random:uniform(10000) +?million) ],
+
     {ok, Ref} = yalinka:new(Data),
     ok = yalinka:store(Ref, "testfile-million"),
     {ok, Tree} = yalinka:load("testfile-million"),
+
     RandomPoint = Point(),
+
+    RandomQueryData = [ list_to_tuple(Point()) || _ <- lists:seq(1, ?aggregs) ],
+
+    EffectFun =
+        fun(R) ->
+                lists:foldl(
+                  fun(P,A) ->
+                          {ok, _, N} =
+                              yalinka:search(R, P, debug),
+                          A + N
+                  end,
+                  0, RandomQueryData)
+        end,
+
+    EffectNew = EffectFun(Ref),
+    EffectStored = EffectFun(Tree),
+
+    io:format(user, "Effectiveness goal: <~p new: ~p stored: ~p~n",
+              [50 * ?aggregs, EffectNew, EffectStored]),
+
     [
      ?_assertEqual( yalinka:size(Ref), {ok, length(Data)} ),
      ?_assertEqual( yalinka:dimension(Ref), {ok, Dimension} ),
@@ -163,20 +304,8 @@ looong_test_() ->
                     yalinka:search(Tree, RandomPoint, 1)),
 
      %% effectivenes aggregated per thousand requests
-     ?_assert( 50 * ?aggregs >
-                   lists:foldl(
-                     fun(_,A) ->
-                             {ok, _, N} =
-                                 yalinka:search(Ref, list_to_tuple(Point()), debug),
-                             A + N
-                     end,
-                     0, lists:seq(1, ?aggregs))),
-     ?_assert( 50 * ?aggregs >
-                   lists:foldl(
-                     fun(_,A) -> {ok, _, N} =
-                                     yalinka:search(Tree, list_to_tuple(Point()), debug),
-                                 A + N
-                     end, 0, lists:seq(1, ?aggregs)))
+     ?_assert( 50 * ?aggregs > EffectNew ),
+     ?_assert( 50 * ?aggregs > EffectStored )
     ].
 
 addition_test_() ->

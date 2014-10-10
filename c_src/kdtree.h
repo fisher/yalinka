@@ -40,31 +40,58 @@
 
 #define MAX_DIM 3
 
-typedef struct kd_node_t KD_NODE_T;
-typedef KD_NODE_T * node_ptr;
+#define ENIF_FREE(x, y) if (tree->dimension <= MAX_DIM) enif_free(x); else enif_free(y);
+
+typedef struct node_3d_t NODE_3D_T;
+typedef struct node_kd_t NODE_KD_T;
+
+typedef union real_node {
+    NODE_3D_T *node_3d;
+    NODE_KD_T *node_kd;
+} uni_node;
+
+typedef NODE_3D_T * node_3d_ptr;
+typedef NODE_KD_T * node_kd_ptr;
+
 typedef struct kd_tree_t KD_TREE_T;
 
 struct kd_tree_t {
-    uint64_t size;         /* quantity of points/nodes in the array */
-    uint64_t dimension;    /* arity of the point in the space */
-    int      ready;        /* flag, set to 1 if tree indexed */
-    node_ptr root;         /* pointer to the root of the tree */
-    node_ptr array;        /* pointer to the array of nodes */
+    uint64_t size;         /* quantity of points/nodes in the array, space size */
+    uint64_t dimension;    /* arity of the point in the space, space dimension */
+    int      ready;        /* readiness flag, set to 1 if tree is indexed */
+    uni_node root;         /* pointer to the root of the tree */
+    uni_node array;        /* pointer to the array of nodes */
+    double  *pts;          /* pointer to the array of points for dimensions >3 */
 };
 
-struct kd_node_t {
-    double x[MAX_DIM];
-    uint64_t idx;
-    node_ptr left;
-    node_ptr right;
+/* optimised for 2d & 3d */
+struct node_3d_t {
+    double      x[MAX_DIM];
+    uint64_t    idx;
+    node_3d_ptr left;
+    node_3d_ptr right;
+};
+
+/* general case */
+struct node_kd_t {
+    double     *x;
+    uint64_t    idx;
+    node_kd_ptr left;
+    node_kd_ptr right;
 };
 
 #ifndef KDTREE_C
 
-extern node_ptr make_tree(struct kd_node_t *t, int len, int i, int dim);
+/* extern uni_node make_tree( uni_node t, int len, int i, int dim); */
 
-extern int nearest( node_ptr root, node_ptr nd, int i, int dim,
-             KD_NODE_T **best, double *best_dist, int counter );
+extern node_3d_ptr make_tree_3d( node_3d_ptr t, int len, int i, int dim);
+extern node_kd_ptr make_tree_kd( node_kd_ptr t, int len, int i, int dim);
+
+extern int nearest( node_3d_ptr root, node_3d_ptr nd, int i, int dim,
+                    node_3d_ptr *best, double *best_dist, int counter );
+
+extern int nearest_kd( node_kd_ptr root, node_kd_ptr nd, int i, int dim,
+                       node_kd_ptr *best, double *best_dist, int counter );
 
 #endif
 
