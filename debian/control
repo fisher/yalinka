@@ -1,0 +1,23 @@
+Source: erlang-yalinka
+Section: devel
+Priority: extra
+Maintainer: Aleksey Morarash <aleksey.morarash@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), erlang-base, erlang-dev,
+ erlang-edoc, gcc
+Standards-Version: 3.9.3
+Homepage: https://github.com/fisher/yalinka
+Vcs-Browser: https://github.com/fisher/yalinka
+Vcs-Git: https://github.com/fisher/yalinka.git
+
+Package: erlang-yalinka
+Architecture: any
+Depends: erlang-base
+Description: Erlang interface to k-dimensional trees
+ This is a library for Erlang language for operating
+ on k-d trees, implemented as a set of erlang NIF
+ (native implemented functions).
+
+Package: erlang-yalinka-doc
+Architecture: all
+Description: Yalinka Erlang Library developer documentation.
+ Contains generated HTML documentation for the Yalinka source code.
