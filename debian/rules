@@ -22,8 +22,8 @@ ERL_APP_DIR = $(DESTDIR)/usr/lib/erlang/lib/yalinka-$(VERSION)
 override_dh_install:
 	install -m 755 -d $(ERL_APP_DIR)/ebin
 	install -m 644 ebin/*.app ebin/*.beam $(ERL_APP_DIR)/ebin
-	install -m 755 -d $(ERL_APP_DIR)/priv
-	install -m 755 priv/lib/*.so $(ERL_APP_DIR)/priv
+	install -m 755 -d $(ERL_APP_DIR)/priv/lib
+	install -m 755 -s priv/lib/*.so $(ERL_APP_DIR)/priv/lib
 	install -m 755 -d $(DOC_DESTDIR)/usr/share/doc/erlang-yalinka-doc
 	install -m 644 doc/*.html doc/*.css doc/*.png \
 	    $(DOC_DESTDIR)/usr/share/doc/erlang-yalinka-doc
