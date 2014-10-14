@@ -55,38 +55,23 @@ pure_crash_test_() ->
                                   ]))
     ].
 
-ok_new_3d_test_() ->
+parallel_addition_test_() ->
+    {ok,T} = yalinka:new([{0,0.0,0.0,0.0}]),
     [
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, 1.1,2.2,3.3},{2, 11.0,22.0,33.0}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, [1.1,2.2,3.3]},{2, [11.0,22.0,33.0]}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{2, 3.2,5.2,6.7},{3, 23.1,5.2,56.20}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, {1.1,2.2,3.3}},{2, {11.0,22.0,33.0}}]))
+     ?_assertEqual(ok, spawn_additions(T)),
+     ?_assertEqual({ok, 34}, yalinka:size(T)),
+     ?_assertMatch({ok, []}, yalinka:gettree(T))
     ].
 
-ok_new_kd_test_() ->
-    [
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, 1.1,2.2,3.3,4.4},{2, 11.0,22.0,33.0,44.0}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, [1.1,2.2,3.3,4.4]},{2, [11.0,22.0,33.0,44.0]}])),
-     ?_assertMatch( {ok, _Ref}, yalinka:new([{1, {1.1,2.2,3.3,4.4}},{2, {11.0,22.0,33.0,44.0}}]))
-    ].
+add_10_inarow(I,A,F,T)->
+    spawn(
+      fun()->
+              [yalinka:insert(T,[{C,{float(C)+F,float(C)+F,float(C)+F}}])
+               ||C<-lists:seq(I,I+10,A)]
+      end).
 
-just_one_7d_test_() ->
-    [ ?_assertMatch(
-         {ok, _Ref},
-         yalinka:new([ {1, 1.1,2.1,3.1,4.1,5.1,6.1,7.1}])) ].
-
-long_5d_test_() ->
-    [
-     ?_assertMatch(
-        {ok, _Ref},
-        yalinka:new([
-                     {1, 1.1,2.2,3.3,4.4,5.5},
-                     {2, 11.0,22.0,33.0,44.0,55.0},
-                     {3, 12.0,22.0,32.0,42.0,52.0},
-                     {4, 10.0,20.0,30.0,40.0,50.0},
-                     {5, 11.1,22.2,33.3,44.4,55.5},
-                     {6, 100.0,200.0,300.0,400.0,500.0},
-                     {7, 101.0,202.0,303.0,404.0,505.0}
-                    ]))
-    ].
-
+spawn_additions(T) ->
+    add_10_inarow(10,1,0.01,T),
+    add_10_inarow(20,1,0.11,T),
+    add_10_inarow(30,1,0.1,T),
+    ok.
