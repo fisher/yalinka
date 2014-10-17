@@ -40,6 +40,7 @@
 #include "ynif_new.h"
 #include "ynif_search.h"
 #include "ynif_other.h"
+#include "ynif_getters.h"
 
 static int  init_mod  (ErlNifEnv*, void** priv_data, ERL_NIF_TERM load_info);
 static void unload_mod(ErlNifEnv*, void*  priv_data);
@@ -50,6 +51,7 @@ static ErlNifFunc nif_funcs[] = {
     {"clear", 1, clear_nif},
     {"size", 1, size_nif},
     {"dimension", 1, dimension_nif},
+    {"is_ready", 1, is_ready_nif},
     {"search", 3, search3_nif},
     {"search", 2, search2_nif},
     {"store", 2, store_nif},
@@ -60,12 +62,10 @@ static ErlNifFunc nif_funcs[] = {
     {"add", 2, add_nif},
     {"insert", 2, insert_nif},
     {"compare", 2, compare_nif},
-    {"is_ready", 1, is_ready_nif},
     {"gettree", 1, gettree_nif}
 };
 
 ERL_NIF_INIT(yalinka, nif_funcs, &init_mod, NULL, NULL, &unload_mod)
-
 
 typedef struct state {
   int64_t stateVersion;

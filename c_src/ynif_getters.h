@@ -1,7 +1,7 @@
 /*
- *     ynif_other.h
+ *     ynif_getters.h
  *
- *     various auxiliary erlang functions implementation
+ *     simple getters for existing object, all they are read-only
  *
  *     this file is part of 'yalinka' project, http://yalinka.heim.in.ua
  *
@@ -33,13 +33,16 @@
  *     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef YNIF_OTHER_H
-#define YNIF_OTHER_H
+#ifndef YNIF_GETTERS_H
+#define YNIF_GETTERS_H
 
-extern ERL_NIF_TERM clear_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-extern ERL_NIF_TERM store_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-extern ERL_NIF_TERM load_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-extern ERL_NIF_TERM insert_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM size_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM dimension_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM is_ready_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM compare_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM gettree_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM root_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM node_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 
 #endif
 
