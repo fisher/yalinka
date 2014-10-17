@@ -18,7 +18,11 @@
 ** TODO search/3 should be able to return more than 1 nearest point
 ** TODO add/2 should reallocate memory and not to copy old data
 ** TODO insert/2 should be more outsmart to really insert, not just add and reindex
-** TODO remove/2 should remove specified nodes by ids from given tree
+   - Note taken on [2014-10-17 пт 17:46] \\
+     seems impossible, since I cannot find a way to _re_allocate memory
+     from inside enif. Need to do an extra investigation and dig into
+     erlang's internals to see how it handles memory using enif_alloc.
+** TODO remove/2 should remove specified nodes by ids from given tree :0.8.0:
 ** DONE compare/2 to compare two trees by its contents                :0.6.0:
 ** TODO usage examples
 ** TODO augment and then refine documentation
