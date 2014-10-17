@@ -93,7 +93,7 @@ ERL_NIF_TERM inspect_first_cell( ErlNifEnv *env,
     const ERL_NIF_TERM *tuple, *tuple2;
 
     if (!enif_get_list_cell(env, list, &head, &tail))
-        return error2(env, "list_expected", enif_make_copy(env, list));
+        return error2(env, "non_empty_list_expected", enif_make_copy(env, list));
 
     if (!enif_get_tuple(env, head, &arity, &tuple))
         return error2(env, "tuple_expected", enif_make_copy(env, head));

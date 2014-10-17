@@ -36,6 +36,11 @@
 start() ->
     not_implemented_yet.
 
+empty_new_test_() ->
+    [
+     ?_assertMatch( {error, {non_empty_list_expected, []}}, yalinka:new([]) )
+    ].
+
 new_test_() ->
     [
      ?_assertMatch( {ok, _Tree}, yalinka:new(?POINTS) ),

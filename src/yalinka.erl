@@ -40,9 +40,10 @@
 
 
 %%--------------------------------------------------------------------
-%% @doc create new k-d tree object
+%% @doc create new k-d tree object. NB: there is no way to create an
+%%    empty object yet.
 %% @end
-%%--------------------------------------------------------------------
+%% --------------------------------------------------------------------
 -spec new([tnode()]) -> {ok, Tree::tref()} | {error, Reason::term()}.
 new(_Points) ->
     ?not_loaded.
@@ -144,7 +145,9 @@ add(_TreeRef, _Points) ->
 
 %%--------------------------------------------------------------------
 %% @private
-%% @doc insert the new node(s) to the tree
+%% @doc insert the new node(s) to the tree. The only difference with
+%%    add/2 is that this function will reindex tree on exit, while add/2
+%%    will leave tree object in non-ready state.
 %% @end
 %%--------------------------------------------------------------------
 -spec insert(tref(), [tnode()] | tnode()) -> ok | {error, Reason::term()}.

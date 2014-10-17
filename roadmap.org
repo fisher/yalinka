@@ -26,3 +26,20 @@
 ** TODO alternative memory managing (GC off, explicit clear/1, configurable)
 ** TODO application + gen_server with stored treerefs in state
 ** TODO possibility to load/1 and index/1 in background
+* Rationale
+** empty tree object creation
+  - Note taken on [2014-10-14 вт 16:17] \\
+    suppose we create an empty tree. We can initialize it with
+    dimension=0. This means that later in any possible operation with this
+    tree object we should take special care about this situation when
+    dimension is still unknown. This affects: add/2, insert/2, (need to
+    inspect first cell?), store/2, index/1 (simple cases: nothing to
+    index/store), root/1, node/2, gettree/1 (just special case to return
+    empty list or proper error description), is_ready/1, compare/2 (can be
+    left intact), search/2, search/3 can be left intact since is_ready=0.
+    So, the actual complexity will go to add/2 and insert/2, and it can
+    share some code. But it also means that any atomic add operation will
+    take longer? Just for one operation of comparison, is dimension eq 0
+    then special treatment is applied. So, what we actually need to do
+    is to make universal fun for inspecting the first cell of a list
+    and initialize the object.
