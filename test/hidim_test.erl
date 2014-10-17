@@ -59,19 +59,23 @@ parallel_addition_test_() ->
     {ok,T} = yalinka:new([{0,0.0,0.0,0.0}]),
     [
      ?_assertEqual(ok, spawn_additions(T)),
-     ?_assertEqual({ok, 34}, yalinka:size(T)),
-     ?_assertMatch({ok, []}, yalinka:gettree(T))
+     ?_assertEqual({ok, 708}, yalinka:size(T)),
+     ?_assertMatch({ok, _List}, yalinka:gettree(T))
     ].
 
 add_10_inarow(I,A,F,T)->
     spawn(
       fun()->
               [yalinka:insert(T,[{C,{float(C)+F,float(C)+F,float(C)+F}}])
-               ||C<-lists:seq(I,I+10,A)]
+               ||C<-lists:seq(I,I+100,A)]
       end).
 
 spawn_additions(T) ->
-    add_10_inarow(10,1,0.01,T),
-    add_10_inarow(20,1,0.11,T),
-    add_10_inarow(30,1,0.1,T),
+    add_10_inarow(100,1,0.01,T),
+    add_10_inarow(200,1,0.11,T),
+    add_10_inarow(300,1,0.1,T),
+    add_10_inarow(400,1,0.2,T),
+    add_10_inarow(500,1,0.3,T),
+    add_10_inarow(600,1,0.4,T),
+    add_10_inarow(700,1,0.5,T),
     ok.
