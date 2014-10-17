@@ -41,6 +41,7 @@
 /*
  * helper fun. In: erlang atom() | binary() in *term
  *            Out: C-style null-terminated string in *buff or NULL if errors
+ *    Side-effect: enif_alloc for returning argument.
  */
 char* gimme_string(ErlNifEnv *env, const ERL_NIF_TERM *term) {
 
@@ -78,13 +79,6 @@ char* gimme_string(ErlNifEnv *env, const ERL_NIF_TERM *term) {
     buff = (char *) enif_alloc(erlbin.size +1);
     memcpy(buff, erlbin.data, erlbin.size);
     buff[erlbin.size] = 0;
-
-    /* alternative approach is to use a termorary buffer
-     * m_len = enif_get_string(env, *term, string, PAYLOAD_MAX_LEN, ERL_NIF_LATIN1);
-     * if (atom_len < 1) return NULL;
-     * buff = (char *) enif_alloc(atom_len);
-     * memcpy(buff, string, atom_len);
-     */
 
   } else {
     printf("not a binary nor an atom\r\n");
