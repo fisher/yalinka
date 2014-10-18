@@ -77,7 +77,7 @@ size(_Tree) ->
     ?not_loaded.
 
 %%--------------------------------------------------------------------
-%% @doc export the Tree into erlang Term
+%% @doc export the Tree object into erlang Term
 %% @end
 %%--------------------------------------------------------------------
 -spec gettree(tref()) -> {ok, Term::[tnode()]} | {error, Reason::term()}.
@@ -121,6 +121,7 @@ index(_Tree) ->
 
 %%--------------------------------------------------------------------
 %% @doc return true if Tree is ready for queries, false otherwise.
+%%
 %%    If this function returns false it means the Tree needs to be
 %%    reindexed, for example, after the call to add/2 or the process
 %%    of reindexing is currently ongoing in background and we need to
@@ -132,6 +133,14 @@ index(_Tree) ->
 is_ready(_Tree) ->
     ?not_loaded.
 
+
+%%--------------------------------------------------------------------
+%% @doc compare given trees for equality
+%% @end
+%%--------------------------------------------------------------------
+-spec compare(tref(), tref()) -> equal | diff.
+compare(_Tree1, _Tree2) ->
+    ?not_loaded.
 
 %%--------------------------------------------------------------------
 %% @doc append the new node(s) to the tree end.
@@ -152,15 +161,6 @@ add(_TreeRef, _Points) ->
 %%--------------------------------------------------------------------
 -spec insert(tref(), [tnode()] | tnode()) -> ok | {error, Reason::term()}.
 insert(_Tree, _Points) ->
-    ?not_loaded.
-
-%%--------------------------------------------------------------------
-%% @private
-%% @doc compare given trees for equality
-%% @end
-%%--------------------------------------------------------------------
--spec compare(tref(), tref()) -> equal | diff.
-compare(_Tree1, _Tree2) ->
     ?not_loaded.
 
 
