@@ -38,9 +38,10 @@
 #include "lib_funs.h"
 #include "kdtree.h"
 #include "ynif_new.h"
+#include "ynif_getters.h"
+#include "ynif_storage.h"
 #include "ynif_search.h"
 #include "ynif_other.h"
-#include "ynif_getters.h"
 
 static int  init_mod  (ErlNifEnv*, void** priv_data, ERL_NIF_TERM load_info);
 static void unload_mod(ErlNifEnv*, void*  priv_data);

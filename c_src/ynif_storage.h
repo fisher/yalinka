@@ -1,7 +1,7 @@
 /*
- *     ynif_other.h
+ *     ynif_storage.h
  *
- *     various auxiliary erlang functions implementation
+ *     store/2 and load/1 implementation
  *
  *     this file is part of 'yalinka' project, http://yalinka.heim.in.ua
  *
@@ -33,11 +33,11 @@
  *     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef YNIF_OTHER_H
-#define YNIF_OTHER_H
+#ifndef YNIF_STORAGE_H
+#define YNIF_STORAGE_H
 
-extern ERL_NIF_TERM clear_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
-extern ERL_NIF_TERM insert_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM store_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
+extern ERL_NIF_TERM load_nif(ErlNifEnv*, int, const ERL_NIF_TERM []);
 
 #endif
 
