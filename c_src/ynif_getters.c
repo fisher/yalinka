@@ -33,9 +33,6 @@
  *     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
 #include <erl_nif.h>
 #include "yalinka.h"
 #include "lib_funs.h"
@@ -253,14 +250,8 @@ ERL_NIF_TERM node_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 
     if (tree->dimension <= MAX_DIM) {
 
-        for (unsigned int i = 0; i<tree->dimension; i++) {
-
-#ifdef DEBUG
-            printf("double [%ud] = %g\r\n", i, tree->array.node_3d[idx].x[i]);
-#endif
+        for (unsigned int i = 0; i<tree->dimension; i++)
             point[i] = enif_make_double(env, tree->array.node_3d[idx].x[i]);
-
-        }
 
         idx = tree->array.node_3d[idx].idx;
 
