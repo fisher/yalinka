@@ -20,9 +20,8 @@ other environments.
 
 ## Limitations
 
- * Points are limited by [IEEE 754 double-precission](http://en.wikipedia.org/wiki/Double_precision_floating-point_format) (64bit) boundaries.
+ * Point coordinates are limited by [IEEE 754 double-precission](http://en.wikipedia.org/wiki/Double_precision_floating-point_format) (64bit) boundaries.
  * Node index is limited to **uint64_t** (erlang positive integer up to 2^64-1
- * Right now the dimensions are limited to only 2d and 3d. This is not a limitation of an algorythm but is done intensionally for performance and memory optimization (no need in dynamic allocation in runtime, used static array[3] instead).
 
 ## Installation
 
