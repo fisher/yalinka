@@ -2,10 +2,12 @@
 
 ## Overview
 
-   This is a library for Erlang language for operating on k-d trees,
+   This is an Erlang library for operating on k-d trees,
 implemented as a set of erlang NIF (native implemented functions).
 
-   For general information about k-d trees see [wikipedia article](http://en.wikipedia.org/wiki/K-d_tree).
+   For general information about k-d trees please see [wikipedia article](http://en.wikipedia.org/wiki/K-d_tree).
+
+   In short, k-d tree object is a set of points in k-dimensional space, organized (indexed) in memory so that the search operation for nearest point next to a given would be as fast as possible. This library is specially optimized for querying large dataset (millions of points).
 
 ## Requirements
 
