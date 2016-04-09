@@ -80,8 +80,7 @@ void kdtree_dtor(ErlNifEnv* env, void* arg)
 {
   KD_TREE_T *handler = (KD_TREE_T *) arg;
 
-  /* TODO: find a proper workaround */
-  if(env) {};
+  (void)(env);
 
 #ifdef DEBUG
 
