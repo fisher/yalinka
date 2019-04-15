@@ -42,7 +42,7 @@ DESTDIR=/usr/lib/erlang/lib make install
 
    Don't forget to use 'gmake' if you're *bsd follower.
 
-   You don't need it to be installed if you want to play with it
+   It doesn't need to be installed if you want to play with it
    first,
 
 <pre>
@@ -53,7 +53,7 @@ $ cd yalinka && make && erl -pa ebin
 
 ## Configuration
 
-   Currently there is no any configuration options.
+   Currently there are no any configuration options.
 
 ## Tests
 
