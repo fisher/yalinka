@@ -24,7 +24,7 @@
 
 -type tag() :: Idx::integer().
 
--type point() :: [float()] | tuple(float()).
+-type point() :: list(float()) | tuple().
 
 -type tnode() :: {Tag::tag(), Point::point()}.
 

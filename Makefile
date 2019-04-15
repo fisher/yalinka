@@ -37,10 +37,14 @@ C_OPTS := -c -Wall -Wextra -pedantic -fpic -std=c99
 
 L_OPTS := -lm
 
-GCC := $(shell which colorgcc || which gcc ||echo cc)
+GCC := $(shell which colorgcc || which gcc || which clang || echo cc)
 
 ifneq ($(wildcard /usr/pbi/erlang-amd64/local/lib/erlang/usr/include/erl_nif.h),)
 	C_OPTS += -I/usr/pbi/erlang-amd64/local/lib/erlang/usr/include
+endif
+
+ifneq ($(wildcard /usr/local/lib/erlang/usr/include/erl_nif.h),)
+	C_OPTS += -I/usr/local/lib/erlang/usr/include
 endif
 
 ifdef DEBUG

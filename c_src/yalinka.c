@@ -46,6 +46,9 @@
 static int  init_mod  (ErlNifEnv*, void** priv_data, ERL_NIF_TERM load_info);
 static void unload_mod(ErlNifEnv*, void*  priv_data);
 
+#if defined ERL_NIF_MAJOR_VERSION && ( ERL_NIF_MAJOR_VERSION == 1 || \
+          ( ERL_NIF_MAJOR_VERSION == 2 && ERL_NIF_MINOR_VERSION  <= 6 ) )
+
 static ErlNifFunc nif_funcs[] = {
     /* fun, arity, c-fun */
     {"new", 1, new_nif},
@@ -65,6 +68,30 @@ static ErlNifFunc nif_funcs[] = {
     {"compare", 2, compare_nif},
     {"gettree", 1, gettree_nif}
 };
+
+#else
+
+static ErlNifFunc nif_funcs[] = {
+    /* fun, arity, c-fun, flags */
+    {"new", 1, new_nif, 0},
+    {"clear", 1, clear_nif, 0},
+    {"size", 1, size_nif, 0},
+    {"dimension", 1, dimension_nif, 0},
+    {"is_ready", 1, is_ready_nif, 0},
+    {"search", 3, search3_nif, 0},
+    {"search", 2, search2_nif, 0},
+    {"store", 2, store_nif, 0},
+    {"load", 1, load_nif, 0},
+    {"root", 1, root_nif, 0},
+    {"node", 2, node_nif, 0},
+    {"index", 1, index_nif, 0},
+    {"add", 2, add_nif, 0},
+    {"insert", 2, insert_nif, 0},
+    {"compare", 2, compare_nif, 0},
+    {"gettree", 1, gettree_nif, 0}
+};
+
+#endif
 
 ERL_NIF_INIT(yalinka, nif_funcs, &init_mod, NULL, NULL, &unload_mod)
 
