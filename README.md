@@ -1,5 +1,7 @@
 # yalinka - Erlang interface to k-dimensional trees
 
+## == The project has been relocated to a [new home](https://gitlab.com/fisher/yalinka) ==
+
 ## Overview
 
    This is an Erlang library for operating on k-d trees,
